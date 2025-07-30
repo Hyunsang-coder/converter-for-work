@@ -1,0 +1,414 @@
+/* 기본 스타일 및 초기화 */
+:root {
+    --tool1-color: #4facfe;
+    --tool2-color: #10ac84;
+    --tool3-color: #2d3561;
+    --background-start: #667eea;
+    --background-end: #764ba2;
+    --light-gray: #f8faff;
+    --border-color: #e3f2fd;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, var(--background-start) 0%, var(--background-end) 100%);
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 1600px;
+    height: 95vh;
+    max-height: 900px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.header {
+    background: linear-gradient(135deg, var(--background-start) 0%, var(--background-end) 100%);
+    color: white;
+    padding: 20px 30px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.header h1 {
+    font-size: 2.2rem;
+    margin-bottom: 5px;
+}
+
+.header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+.tab-navigation {
+    background: var(--light-gray);
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tab-btn {
+    flex: 1;
+    max-width: 350px;
+    padding: 18px 25px;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 4px solid transparent;
+}
+
+.tab-btn.active {
+    background: white;
+    border-bottom-color: currentColor;
+}
+
+.tab-btn.tab-1 {
+    color: var(--tool1-color);
+}
+
+.tab-btn.tab-2 {
+    color: var(--tool2-color);
+}
+
+.tab-btn.tab-3 {
+    color: var(--tool3-color);
+}
+
+/* === 핵심 레이아웃 === */
+.tool-content {
+    display: none;
+    flex-grow: 1;
+    padding: 20px 30px;
+    min-height: 0;
+}
+
+.tool-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.workflow-section {
+    display: flex;
+    gap: 25px;
+    align-items: stretch;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.section-container {
+    flex: 1;
+    background: var(--light-gray);
+    border-radius: 15px;
+    padding: 20px;
+    border: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.conversion-arrow {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.arrow-btn {
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.arrow-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+}
+
+.arrow-label {
+    margin-top: 15px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    flex-shrink: 0;
+}
+
+/* === 입력/출력 영역 (div + overflow로 문제 해결) === */
+.input-area {
+    width: 100%;
+    flex-grow: 1;
+    border: 2px solid #e0e7ff;
+    border-radius: 10px;
+    padding: 15px;
+    font-family: 'Menlo', 'Monaco', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    background: white;
+    resize: none;
+    min-height: 0;
+    overflow: auto;
+    /* 핵심: overflow 해결 */
+}
+
+.input-area:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+}
+
+.input-area:empty:before {
+    content: attr(placeholder);
+    color: #9ca3af;
+}
+
+textarea {
+    width: 100%;
+    flex-grow: 1;
+    border: 2px solid #e0e7ff;
+    border-radius: 10px;
+    padding: 15px;
+    font-family: 'Menlo', 'Monaco', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    background: white;
+    resize: none;
+    min-height: 0;
+    overflow: auto;
+}
+
+textarea:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+}
+
+.table-preview {
+    border: 2px solid #e0e7ff;
+    border-radius: 10px;
+    padding: 15px;
+    background: white;
+    overflow: auto;
+}
+
+.table-preview.output {
+    flex-grow: 1;
+}
+
+.empty-state {
+    color: #94a3b8;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+}
+
+/* 버튼 및 기타 UI 요소 */
+.controls {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    padding-top: 20px;
+    flex-shrink: 0;
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.status {
+    text-align: center;
+    padding: 12px;
+    border-radius: 10px;
+    margin-top: 15px;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+.status.show {
+    opacity: 1;
+}
+
+.status.success {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status.error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* 도구별 색상 스타일 */
+.tool-1 .arrow-btn {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+.tool-1 .arrow-label {
+    color: var(--tool1-color);
+}
+
+.tool-1 .input-area:focus {
+    border-color: var(--tool1-color);
+}
+
+.tool-1 .btn-primary {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: white;
+}
+
+.tool-2 .arrow-btn {
+    background: linear-gradient(135deg, #10ac84, #1dd1a1);
+}
+
+.tool-2 .arrow-label {
+    color: var(--tool2-color);
+}
+
+.tool-2 .input-area:focus {
+    border-color: var(--tool2-color);
+}
+
+.tool-2 .btn-primary {
+    background: linear-gradient(135deg, #10ac84, #1dd1a1);
+    color: white;
+}
+
+.tool-3 .arrow-btn {
+    background: linear-gradient(135deg, #2d3561, #c05c7e);
+}
+
+.tool-3 .arrow-label {
+    color: var(--tool3-color);
+}
+
+.tool-3 textarea:focus {
+    border-color: var(--tool3-color);
+}
+
+.tool-3 .btn-primary {
+    background: linear-gradient(135deg, #2d3561, #c05c7e);
+    color: white;
+}
+
+.btn-copy {
+    background: linear-gradient(135deg, #fdcb6e, #fab1a0);
+    color: #333;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #e0e0e0, #f5f5f5);
+    color: #333;
+}
+
+/* 테이블 스타일 */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+}
+
+th,
+td {
+    border: 1px solid #d1d5db;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
+    white-space: pre-wrap;
+}
+
+th {
+    background: #f9fafb;
+    font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+    body {
+        padding: 0;
+        align-items: initial;
+    }
+
+    .container {
+        height: 100vh;
+        max-height: none;
+        border-radius: 0;
+    }
+
+    .workflow-section {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .conversion-arrow {
+        flex-direction: row;
+        justify-content: center;
+        padding: 5px 0;
+    }
+
+    .arrow-btn {
+        transform: rotate(90deg);
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .arrow-label {
+        margin-top: 0;
+        margin-left: 15px;
+    }
+
+    .tool-content {
+        padding: 15px;
+    }
+}

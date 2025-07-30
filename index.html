@@ -1,158 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>개선된 변환 도구 모음 - HTML/Excel/Markdown 변환기</title>
-    <style>
-        /* 기본 스타일 및 초기화 */
-        :root {
-            --tool1-color: #4facfe;
-            --tool2-color: #10ac84;
-            --tool3-color: #2d3561;
-            --background-start: #667eea;
-            --background-end: #764ba2;
-            --light-gray: #f8faff;
-            --border-color: #e3f2fd;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--background-start) 0%, var(--background-end) 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1600px;
-            height: 95vh;
-            max-height: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, var(--background-start) 0%, var(--background-end) 100%);
-            color: white;
-            padding: 20px 30px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-
-        .header h1 { font-size: 2.2rem; margin-bottom: 5px; }
-        .header p { font-size: 1.1rem; opacity: 0.9; }
-
-        .tab-navigation {
-            background: var(--light-gray);
-            border-bottom: 2px solid var(--border-color);
-            display: flex;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .tab-btn {
-            flex: 1; max-width: 350px; padding: 18px 25px; border: none;
-            background: transparent; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: all 0.3s ease;
-            border-bottom: 4px solid transparent;
-        }
-
-        .tab-btn.active { background: white; border-bottom-color: currentColor; }
-        .tab-btn.tab-1 { color: var(--tool1-color); }
-        .tab-btn.tab-2 { color: var(--tool2-color); }
-        .tab-btn.tab-3 { color: var(--tool3-color); }
-
-        /* === 핵심 레이아웃 === */
-        .tool-content { display: none; flex-grow: 1; padding: 20px 30px; min-height: 0; }
-        .tool-content.active { display: flex; flex-direction: column; }
-        .workflow-section { display: flex; gap: 25px; align-items: stretch; flex-grow: 1; min-height: 0; }
-        .section-container { flex: 1; background: var(--light-gray); border-radius: 15px; padding: 20px; border: 2px solid var(--border-color); display: flex; flex-direction: column; min-width: 0; }
-        .conversion-arrow { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .arrow-btn { color: white; border: none; border-radius: 50%; width: 70px; height: 70px; font-size: 1.8rem; cursor: pointer; transition: all 0.3s ease; }
-        .arrow-btn:hover:not(:disabled) { transform: scale(1.1); }
-        .arrow-label { margin-top: 15px; font-weight: 600; text-align: center; }
-        .section-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 15px; flex-shrink: 0; }
-
-        /* === 입력/출력 영역 (div + overflow로 문제 해결) === */
-        .input-area {
-            width: 100%; flex-grow: 1; border: 2px solid #e0e7ff; border-radius: 10px; padding: 15px;
-            font-family: 'Menlo', 'Monaco', monospace; font-size: 14px; line-height: 1.6;
-            background: white; resize: none; min-height: 0; overflow: auto; /* 핵심: overflow 해결 */
-        }
-        .input-area:focus { outline: none; box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1); }
-        .input-area:empty:before { content: attr(placeholder); color: #9ca3af; }
-
-        textarea {
-            width: 100%; flex-grow: 1; border: 2px solid #e0e7ff; border-radius: 10px; padding: 15px;
-            font-family: 'Menlo', 'Monaco', monospace; font-size: 14px; line-height: 1.6;
-            background: white; resize: none; min-height: 0; overflow: auto;
-        }
-        textarea:focus { outline: none; box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1); }
-
-        .table-preview { border: 2px solid #e0e7ff; border-radius: 10px; padding: 15px; background: white; overflow: auto; }
-        .table-preview.output { flex-grow: 1; }
-        .empty-state { color: #94a3b8; font-style: italic; display: flex; align-items: center; justify-content: center; height: 100%; text-align: center; }
-
-        /* 버튼 및 기타 UI 요소 */
-        .controls { display: flex; gap: 15px; justify-content: center; padding-top: 20px; flex-shrink: 0; }
-        .btn { padding: 12px 30px; border: none; border-radius: 25px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
-        .btn:hover:not(:disabled) { transform: translateY(-2px); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
-        .status { text-align: center; padding: 12px; border-radius: 10px; margin-top: 15px; font-weight: 500; opacity: 0; transition: opacity 0.3s ease; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; }
-        .status.show { opacity: 1; }
-        .status.success { background: #d4edda; color: #155724; }
-        .status.error { background: #f8d7da; color: #721c24; }
-
-        /* 도구별 색상 스타일 */
-        .tool-1 .arrow-btn { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-        .tool-1 .arrow-label { color: var(--tool1-color); }
-        .tool-1 .input-area:focus { border-color: var(--tool1-color); }
-        .tool-1 .btn-primary { background: linear-gradient(135deg, #4facfe, #00f2fe); color: white; }
-
-        .tool-2 .arrow-btn { background: linear-gradient(135deg, #10ac84, #1dd1a1); }
-        .tool-2 .arrow-label { color: var(--tool2-color); }
-        .tool-2 .input-area:focus { border-color: var(--tool2-color); }
-        .tool-2 .btn-primary { background: linear-gradient(135deg, #10ac84, #1dd1a1); color: white; }
-
-        .tool-3 .arrow-btn { background: linear-gradient(135deg, #2d3561, #c05c7e); }
-        .tool-3 .arrow-label { color: var(--tool3-color); }
-        .tool-3 textarea:focus { border-color: var(--tool3-color); }
-        .tool-3 .btn-primary { background: linear-gradient(135deg, #2d3561, #c05c7e); color: white; }
-        
-        .btn-copy { background: linear-gradient(135deg, #fdcb6e, #fab1a0); color: #333; }
-        .btn-secondary { background: linear-gradient(135deg, #e0e0e0, #f5f5f5); color: #333; }
-
-        /* 테이블 스타일 */
-        table { border-collapse: collapse; width: 100%; font-size: 14px; }
-        th, td { border: 1px solid #d1d5db; padding: 8px 12px; text-align: left; vertical-align: top; white-space: pre-wrap; }
-        th { background: #f9fafb; font-weight: 600; }
-
-        @media (max-width: 1024px) {
-            body { padding: 0; align-items: initial; }
-            .container { height: 100vh; max-height: none; border-radius: 0; }
-            .workflow-section { flex-direction: column; gap: 15px; }
-            .conversion-arrow { flex-direction: row; justify-content: center; padding: 5px 0;}
-            .arrow-btn { transform: rotate(90deg); width: 50px; height: 50px; font-size: 1.5rem;}
-            .arrow-label { margin-top: 0; margin-left: 15px; }
-            .tool-content { padding: 15px; }
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -170,7 +25,8 @@
             <div class="workflow-section">
                 <div class="section-container">
                     <div class="section-title">웹페이지 내용 붙여넣기 (Ctrl+V)</div>
-                    <div id="htmlInput" class="input-area" contenteditable="true" placeholder="이곳에 웹페이지의 전체 또는 일부를 복사하여 붙여넣으세요..."></div>
+                    <div id="htmlInput" class="input-area" contenteditable="true"
+                        placeholder="이곳에 웹페이지의 전체 또는 일부를 복사하여 붙여넣으세요..."></div>
                 </div>
                 <div class="conversion-arrow">
                     <button class="arrow-btn" id="htmlConvertBtn" onclick="convertHtmlToMarkdown()" disabled>➡️</button>
@@ -183,7 +39,9 @@
             </div>
             <div class="controls">
                 <button class="btn btn-primary" onclick="convertHtmlToMarkdown()">⚡ 마크다운 변환</button>
-                <button class="btn btn-copy" onclick="copyToClipboard(document.getElementById('htmlMarkdownOutput').value)" id="htmlCopyBtn" disabled>📄 결과 복사</button>
+                <button class="btn btn-copy"
+                    onclick="copyToClipboard(document.getElementById('htmlMarkdownOutput').value)" id="htmlCopyBtn"
+                    disabled>📄 결과 복사</button>
                 <button class="btn btn-secondary" onclick="clearHtmlTool()">🗑️ 초기화</button>
             </div>
         </div>
@@ -193,10 +51,12 @@
             <div class="workflow-section">
                 <div class="section-container">
                     <div class="section-title">엑셀 테이블 붙여넣기 (Ctrl+V)</div>
-                    <div id="excelInput" class="input-area" contenteditable="true" placeholder="이곳에 엑셀 시트의 셀들을 복사하여 붙여넣으세요..."></div>
+                    <div id="excelInput" class="input-area" contenteditable="true"
+                        placeholder="이곳에 엑셀 시트의 셀들을 복사하여 붙여넣으세요..."></div>
                 </div>
                 <div class="conversion-arrow">
-                    <button class="arrow-btn" id="excelConvertBtn" onclick="convertExcelToMarkdown()" disabled>➡️</button>
+                    <button class="arrow-btn" id="excelConvertBtn" onclick="convertExcelToMarkdown()"
+                        disabled>➡️</button>
                     <div class="arrow-label">마크다운<br>테이블 변환</div>
                 </div>
                 <div class="section-container">
@@ -206,7 +66,9 @@
             </div>
             <div class="controls">
                 <button class="btn btn-primary" onclick="convertExcelToMarkdown()">📊 테이블 변환</button>
-                <button class="btn btn-copy" onclick="copyToClipboard(document.getElementById('excelMarkdownOutput').value)" id="excelCopyBtn" disabled>📄 결과 복사</button>
+                <button class="btn btn-copy"
+                    onclick="copyToClipboard(document.getElementById('excelMarkdownOutput').value)" id="excelCopyBtn"
+                    disabled>📄 결과 복사</button>
                 <button class="btn btn-secondary" onclick="clearExcelTool()">🗑️ 초기화</button>
             </div>
         </div>
@@ -219,7 +81,8 @@
                     <textarea id="markdownInput" placeholder="마크다운 테이블을 여기에 붙여넣으세요..."></textarea>
                 </div>
                 <div class="conversion-arrow">
-                    <button class="arrow-btn" id="markdownConvertBtn" onclick="convertMarkdownToExcel()" disabled>📊</button>
+                    <button class="arrow-btn" id="markdownConvertBtn" onclick="convertMarkdownToExcel()"
+                        disabled>📊</button>
                     <div class="arrow-label">엑셀용<br>변환</div>
                 </div>
                 <div class="section-container">
@@ -231,384 +94,19 @@
             </div>
             <div class="controls">
                 <button class="btn btn-primary" onclick="convertMarkdownToExcel()">📊 테이블 변환</button>
-                <button class="btn btn-copy" onclick="copyToClipboard(markdownTsvData)" id="markdownCopyBtn" disabled>📋 클립보드에 복사</button>
+                <button class="btn btn-copy" onclick="copyToClipboard(markdownTsvData)" id="markdownCopyBtn" disabled>📋
+                    클립보드에 복사</button>
                 <button class="btn btn-secondary" onclick="clearMarkdownTool()">🗑️ 초기화</button>
             </div>
         </div>
         <div id="status" class="status"></div>
     </div>
 
-    <script>
-        // --- 전역 변수 ---
-        let currentTool = 1;
-        let excelTableData = null;
-        let markdownTsvData = '';
-
-        // --- 탭 전환 ---
-        function switchTool(toolNumber) {
-            document.querySelectorAll('.tool-content').forEach(tool => tool.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(tab => tab.classList.remove('active'));
-            document.getElementById(`tool-${toolNumber}`).classList.add('active');
-            document.querySelector(`.tab-btn.tab-${toolNumber}`).classList.add('active');
-            currentTool = toolNumber;
-            clearStatus();
-        }
-
-        // --- 공용 함수 ---
-        function showStatus(message, type = 'info', duration = 3000) {
-            const statusDiv = document.getElementById('status');
-            if (!statusDiv) return;
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type} show`;
-            setTimeout(() => statusDiv.classList.remove('show'), duration);
-        }
-
-        function clearStatus() {
-            const statusDiv = document.getElementById('status');
-            if (statusDiv) statusDiv.classList.remove('show');
-        }
-
-        function copyToClipboard(textToCopy) {
-            if (!textToCopy) {
-                showStatus('복사할 내용이 없습니다.', 'error');
-                return;
-            }
-            const textArea = document.createElement("textarea");
-            textArea.value = textToCopy;
-            textArea.style.position = "fixed";
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                const successful = document.execCommand('copy');
-                const msg = successful ? '📋 클립보드에 복사되었습니다!' : '복사에 실패했습니다.';
-                const type = successful ? 'success' : 'error';
-                showStatus(msg, type);
-            } catch (err) {
-                showStatus('복사에 실패했습니다.', 'error');
-            }
-            document.body.removeChild(textArea);
-        }
-
-        function createHtmlTable(data) {
-            if (!data || data.length === 0) return '<div class="empty-state">테이블 데이터 없음</div>';
-            let table = '<table>';
-            const headerCount = data[0].length;
-            table += '<thead><tr>';
-            data[0].forEach(header => table += `<th>${(header || '').replace(/\n/g, '<br>')}</th>`);
-            table += '</tr></thead><tbody>';
-            data.slice(1).forEach(row => {
-                table += '<tr>';
-                for (let i = 0; i < headerCount; i++) {
-                    table += `<td>${(row[i] || '').replace(/\n/g, '<br>')}</td>`;
-                }
-                table += '</tr>';
-            });
-            table += '</tbody></table>';
-            return table;
-        }
-
-        /**
-         * 데이터를 Excel에 안전하게 붙여넣을 수 있는 TSV 형식으로 변환합니다.
-         * 셀에 줄바꿈이나 큰따옴표가 있으면 셀을 큰따옴표로 감쌉니다.
-         * @param {string[][]} data - 2D 배열 형태의 테이블 데이터
-         * @returns {string} TSV 형식의 문자열
-         */
-        function convertToSafeTSV(data) {
-            return data.map(row => {
-                return row.map(cell => {
-                    let cellStr = String(cell || '');
-                    if (cellStr.includes('\n') || cellStr.includes('\t') || cellStr.includes('"')) {
-                        cellStr = cellStr.replace(/"/g, '""');
-                        return `"${cellStr}"`;
-                    }
-                    return cellStr;
-                }).join('\t');
-            }).join('\n');
-        }
-
-        /**
-         * HTML 셀 내용에서 순수 텍스트와 줄바꿈만 추출하는 정제 함수 (수정됨)
-         * @param {string} html - 셀의 innerHTML
-         * @returns {string} 정제된 텍스트
-         */
-        function cleanCellContent(html) {
-            const tempDiv = document.createElement('div');
-            tempDiv.style.position = 'absolute';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.whiteSpace = 'nowrap';
-            html = html.replace(/<!--[\s\S]*?-->/g, '').replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-            tempDiv.innerHTML = html;
-            document.body.appendChild(tempDiv);
-            
-            let text = tempDiv.innerText || tempDiv.textContent;
-
-            document.body.removeChild(tempDiv);
-            return text.trim();
-        }
-
-        // === 도구 1: HTML -> 마크다운 (수정됨) ===
-        document.getElementById('htmlInput').addEventListener('input', function() {
-            document.getElementById('htmlConvertBtn').disabled = this.innerHTML.trim().length === 0;
-        });
-
-        function convertHtmlToMarkdown() {
-            const inputDiv = document.getElementById('htmlInput');
-            const output = document.getElementById('htmlMarkdownOutput');
-            const copyBtn = document.getElementById('htmlCopyBtn');
-            if (inputDiv.innerHTML.trim().length === 0) {
-                showStatus('변환할 내용이 없습니다.', 'error');
-                return;
-            }
-            try {
-                const markdown = domToMarkdown(inputDiv);
-                output.value = markdown;
-                copyBtn.disabled = !markdown;
-                showStatus('🎉 마크다운 변환 완료!', 'success');
-            } catch (error) {
-                showStatus('변환 중 오류 발생: ' + error.message, 'error');
-                copyBtn.disabled = true;
-            }
-        }
-        
-        function domToMarkdown(rootElement) {
-            // New recursive parser for handling nested lists
-            function processNode(node, depth = 0) {
-                if (node.nodeType === Node.TEXT_NODE) {
-                    return node.textContent.replace(/\s+/g, ' ').trim();
-                }
-                if (node.nodeType !== Node.ELEMENT_NODE) {
-                    return '';
-                }
-
-                const tagName = node.tagName.toLowerCase();
-                let content = '';
-                
-                // Process children first
-                node.childNodes.forEach(child => {
-                    content += processNode(child, depth);
-                });
-
-                switch (tagName) {
-                    case 'h1': return '# ' + content.trim() + '\n\n';
-                    case 'h2': return '## ' + content.trim() + '\n\n';
-                    case 'h3': return '### ' + content.trim() + '\n\n';
-                    case 'p': return content.trim() + '\n\n';
-                    case 'strong': case 'b': return `**${content.trim()}**`;
-                    case 'em': case 'i': return `*${content.trim()}*`;
-                    case 'br': return '\n'; // Treat <br> as a hard line break
-                    case 'ul':
-                    case 'ol':
-                        let listContent = '\n';
-                        Array.from(node.children).forEach((li, index) => {
-                             if(li.tagName.toLowerCase() === 'li') {
-                                listContent += processListItem(li, depth, tagName === 'ol', index);
-                             }
-                        });
-                        return listContent;
-                    case 'table':
-                        let tableMd = '\n';
-                        const headers = Array.from(node.querySelectorAll('th')).map(th => cleanCellContent(th.innerHTML).replace(/\n/g, '<br>'));
-                        if (headers.length > 0) {
-                            tableMd += `| ${headers.join(' | ')} |\n`;
-                            tableMd += `|${' --- |'.repeat(headers.length)}\n`;
-                        }
-                        const rows = node.querySelectorAll('tbody tr');
-                        rows.forEach(row => {
-                            const cells = Array.from(row.cells).map(td => cleanCellContent(td.innerHTML).replace(/\n/g, '<br>'));
-                            tableMd += `| ${cells.join(' | ')} |\n`;
-                        });
-                        return tableMd + '\n';
-                    default: return content;
-                }
-            }
-
-            function processListItem(liNode, depth, isOrdered, index) {
-                const indent = '  '.repeat(depth);
-                const marker = isOrdered ? `${index + 1}. ` : '- ';
-                
-                let textContent = '';
-                let nestedListContent = '';
-
-                Array.from(liNode.childNodes).forEach(child => {
-                    if (child.nodeName.toLowerCase() === 'ul' || child.nodeName.toLowerCase() === 'ol') {
-                        nestedListContent += processNode(child, depth + 1);
-                    } else {
-                        textContent += processNode(child, depth);
-                    }
-                });
-
-                return `${indent}${marker}${textContent.trim()}${nestedListContent}\n`;
-            }
-
-            // Clean up the final output
-            let markdown = processNode(rootElement, 0);
-            return markdown.replace(/\n{3,}/g, '\n\n').trim();
-        }
-
-        function clearHtmlTool() {
-            document.getElementById('htmlInput').innerHTML = '';
-            document.getElementById('htmlMarkdownOutput').value = '';
-            document.getElementById('htmlCopyBtn').disabled = true;
-            document.getElementById('htmlConvertBtn').disabled = true;
-            showStatus('초기화되었습니다.', 'success');
-        }
-
-        // === 도구 2: 엑셀 -> 마크다운 ===
-        document.getElementById('excelInput').addEventListener('paste', function(e) {
-            e.preventDefault();
-            const clipboardData = e.clipboardData;
-            const htmlData = clipboardData.getData('text/html');
-            const plainData = clipboardData.getData('text/plain');
-            let parsedData = null;
-
-            if (htmlData && htmlData.includes('<table')) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = htmlData;
-                const table = tempDiv.querySelector('table');
-                if (table) {
-                    parsedData = Array.from(table.rows).map(row =>
-                        Array.from(row.cells).map(cell => cleanCellContent(cell.innerHTML))
-                    );
-                }
-            }
-            
-            if (!parsedData && plainData) {
-                parsedData = plainData.trim().split(/[\r\n]+/).map(row => row.split('\t'));
-            }
-
-            if (parsedData && parsedData.length > 0) {
-                excelTableData = parsedData;
-                this.innerHTML = createHtmlTable(excelTableData);
-                document.getElementById('excelConvertBtn').disabled = false;
-                showStatus('✨ 테이블 데이터를 성공적으로 붙여넣었습니다!', 'success');
-            } else {
-                this.textContent = plainData;
-                showStatus('테이블 데이터를 찾지 못했습니다.', 'error');
-            }
-        });
-        
-        function convertExcelToMarkdown() {
-            const output = document.getElementById('excelMarkdownOutput');
-            const copyBtn = document.getElementById('excelCopyBtn');
-            if (!excelTableData || excelTableData.length === 0) {
-                showStatus('변환할 테이블 데이터가 없습니다.', 'error');
-                return;
-            }
-            try {
-                const headerCount = excelTableData[0].length;
-                let markdown = '';
-                excelTableData.forEach((row, rowIndex) => {
-                    const processedRow = row.map(cell => String(cell || '').replace(/\n/g, '<br>'));
-                    while (processedRow.length < headerCount) { processedRow.push(''); }
-                    markdown += `| ${processedRow.slice(0, headerCount).join(' | ')} |\n`;
-                    if (rowIndex === 0) {
-                        markdown += `|${' --- |'.repeat(headerCount)}\n`;
-                    }
-                });
-
-                output.value = markdown;
-                copyBtn.disabled = false;
-                showStatus('🎉 마크다운 테이블 변환 완료!', 'success');
-            } catch (error) {
-                showStatus('변환 중 오류 발생: ' + error.message, 'error');
-                copyBtn.disabled = true;
-            }
-        }
-
-        function clearExcelTool() {
-            document.getElementById('excelInput').innerHTML = '';
-            document.getElementById('excelMarkdownOutput').value = '';
-            document.getElementById('excelCopyBtn').disabled = true;
-            document.getElementById('excelConvertBtn').disabled = true;
-            excelTableData = null;
-            showStatus('초기화되었습니다.', 'success');
-        }
-
-        // === 도구 3: 마크다운 -> 엑셀 ===
-        document.getElementById('markdownInput').addEventListener('input', function() {
-            document.getElementById('markdownConvertBtn').disabled = !this.value.trim();
-        });
-
-        function convertMarkdownToExcel() {
-            const input = document.getElementById('markdownInput').value.trim();
-            const preview = document.getElementById('markdownTablePreview');
-            const copyBtn = document.getElementById('markdownCopyBtn');
-            if (!input) {
-                showStatus('변환할 마크다운을 입력해주세요.', 'error');
-                return;
-            }
-            try {
-                const lines = input.split('\n');
-                let separatorIndex = -1;
-                for (let i = 0; i < lines.length; i++) {
-                    if (/^\|?\s*([:\-]{3,}\s*\|)+/.test(lines[i].trim())) {
-                        separatorIndex = i;
-                        break;
-                    }
-                }
-
-                if (separatorIndex === -1) throw new Error('유효한 마크다운 테이블 구분선을 찾을 수 없습니다.');
-                
-                const logicalRows = [];
-                let currentRowLines = [];
-                const contentLines = lines.filter((_, i) => i !== separatorIndex);
-
-                for (const line of contentLines) {
-                    const trimmedLine = line.trim();
-                    if (trimmedLine.startsWith('|')) {
-                        if (currentRowLines.length > 0) {
-                            logicalRows.push(currentRowLines.join('\n'));
-                        }
-                        currentRowLines = [line];
-                    } else if (currentRowLines.length > 0) {
-                        currentRowLines.push(line);
-                    }
-                }
-                if (currentRowLines.length > 0) {
-                    logicalRows.push(currentRowLines.join('\n'));
-                }
-                if (logicalRows.length === 0) throw new Error('테이블 데이터를 찾을 수 없습니다.');
-                
-                const tableData = logicalRows.map(rowStr => 
-                    rowStr
-                        .replace(/^\||\|$/g, '')
-                        .split('|')
-                        .map(cell => cell.trim().replace(/<br\s*\/?>/gi, '\n'))
-                );
-                
-                const headers = tableData[0] || [];
-                const columnCount = headers.length;
-                if (columnCount === 0) throw new Error('테이블 헤더에서 열을 찾을 수 없습니다.');
-                
-                const finalTableData = tableData.map(row => {
-                     while(row.length < columnCount) { row.push(''); }
-                     return row.slice(0, columnCount);
-                });
-
-                markdownTsvData = convertToSafeTSV(finalTableData);
-                preview.innerHTML = createHtmlTable(finalTableData);
-                copyBtn.disabled = false;
-                showStatus(`🎉 ${finalTableData.length}행 ${columnCount}열 변환 완료!`, 'success');
-
-            } catch (error) {
-                showStatus('변환 실패: ' + error.message, 'error');
-                preview.innerHTML = '<div class="empty-state">변환된 테이블이 여기에 표시됩니다.</div>';
-                copyBtn.disabled = true;
-                markdownTsvData = '';
-            }
-        }
-
-        function clearMarkdownTool() {
-            document.getElementById('markdownInput').value = '';
-            document.getElementById('markdownTablePreview').innerHTML = '<div class="empty-state">변환된 테이블이 여기에 표시됩니다.</div>';
-            document.getElementById('markdownCopyBtn').disabled = true;
-            document.getElementById('markdownConvertBtn').disabled = true;
-            markdownTsvData = '';
-            showStatus('초기화되었습니다.', 'success');
-        }
-    </script>
+    <!-- JavaScript 파일들 -->
+    <script src="js/common.js"></script>
+    <script src="js/html-to-markdown.js"></script>
+    <script src="js/excel-to-markdown.js"></script>
+    <script src="js/markdown-to-excel.js"></script>
 </body>
+
 </html>
