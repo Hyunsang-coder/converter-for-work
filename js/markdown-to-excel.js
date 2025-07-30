@@ -23,11 +23,11 @@ function convertMarkdownToExcel() {
             }
         }
 
-        if (separatorIndex === -1) throw new Error('유효한 마크다운 테이블 구분선을 찾을 수 없습니다.');
-
         const logicalRows = [];
         let currentRowLines = [];
-        const contentLines = lines.filter((_, i) => i !== separatorIndex);
+
+        // 구분선이 있는 경우와 없는 경우를 구분하여 처리
+        const contentLines = separatorIndex === -1 ? lines : lines.filter((_, i) => i !== separatorIndex);
 
         for (const line of contentLines) {
             const trimmedLine = line.trim();
@@ -52,19 +52,33 @@ function convertMarkdownToExcel() {
                 .map(cell => cell.trim().replace(/<br\s*\/?>/gi, '\n'))
         );
 
-        const headers = tableData[0] || [];
-        const columnCount = headers.length;
-        if (columnCount === 0) throw new Error('테이블 헤더에서 열을 찾을 수 없습니다.');
+        let finalTableData;
+        let columnCount;
 
-        const finalTableData = tableData.map(row => {
-            while (row.length < columnCount) { row.push(''); }
-            return row.slice(0, columnCount);
-        });
+        if (separatorIndex === -1) {
+            // 구분선이 없는 경우: 모든 행을 데이터로 처리
+            finalTableData = tableData;
+            columnCount = Math.max(...tableData.map(row => row.length));
+        } else {
+            // 구분선이 있는 경우: 첫 번째 행을 헤더로 처리
+            const headers = tableData[0] || [];
+            columnCount = headers.length;
+            if (columnCount === 0) throw new Error('테이블 헤더에서 열을 찾을 수 없습니다.');
+
+            finalTableData = tableData.map(row => {
+                while (row.length < columnCount) { row.push(''); }
+                return row.slice(0, columnCount);
+            });
+        }
 
         markdownTsvData = convertToSafeTSV(finalTableData);
-        preview.innerHTML = createHtmlTable(finalTableData);
+        preview.innerHTML = createHtmlTable(finalTableData, separatorIndex !== -1);
         copyBtn.disabled = false;
-        showStatus(`🎉 ${finalTableData.length}행 ${columnCount}열 변환 완료!`, 'success');
+
+        const statusMessage = separatorIndex === -1
+            ? `🎉 구분선 없는 테이블: ${finalTableData.length}행 ${columnCount}열 변환 완료! (모든 행을 데이터로 처리)`
+            : `🎉 ${finalTableData.length}행 ${columnCount}열 변환 완료!`;
+        showStatus(statusMessage, 'success');
 
     } catch (error) {
         showStatus('변환 실패: ' + error.message, 'error');

@@ -51,21 +51,38 @@ function copyToClipboard(textToCopy) {
     document.body.removeChild(textArea);
 }
 
-function createHtmlTable(data) {
+function createHtmlTable(data, hasHeader = true) {
     if (!data || data.length === 0) return '<div class="empty-state">테이블 데이터 없음</div>';
     let table = '<table>';
     const headerCount = data[0].length;
-    table += '<thead><tr>';
-    data[0].forEach(header => table += `<th>${(header || '').replace(/\n/g, '<br>')}</th>`);
-    table += '</tr></thead><tbody>';
-    data.slice(1).forEach(row => {
-        table += '<tr>';
-        for (let i = 0; i < headerCount; i++) {
-            table += `<td>${(row[i] || '').replace(/\n/g, '<br>')}</td>`;
-        }
-        table += '</tr>';
-    });
-    table += '</tbody></table>';
+
+    if (hasHeader) {
+        // 헤더가 있는 경우: 첫 번째 행을 헤더로 처리
+        table += '<thead><tr>';
+        data[0].forEach(header => table += `<th>${(header || '').replace(/\n/g, '<br>')}</th>`);
+        table += '</tr></thead><tbody>';
+        data.slice(1).forEach(row => {
+            table += '<tr>';
+            for (let i = 0; i < headerCount; i++) {
+                table += `<td>${(row[i] || '').replace(/\n/g, '<br>')}</td>`;
+            }
+            table += '</tr>';
+        });
+        table += '</tbody>';
+    } else {
+        // 헤더가 없는 경우: 모든 행을 데이터로 처리
+        table += '<tbody>';
+        data.forEach(row => {
+            table += '<tr>';
+            for (let i = 0; i < headerCount; i++) {
+                table += `<td>${(row[i] || '').replace(/\n/g, '<br>')}</td>`;
+            }
+            table += '</tr>';
+        });
+        table += '</tbody>';
+    }
+
+    table += '</table>';
     return table;
 }
 

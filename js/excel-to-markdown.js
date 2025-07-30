@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function convertExcelToMarkdown() {
     const output = document.getElementById('excelMarkdownOutput');
     const copyBtn = document.getElementById('excelCopyBtn');
+    const includeSeparator = document.getElementById('useFirstRowAsHeader')?.checked ?? true;
     if (!excelTableData || excelTableData.length === 0) {
         showStatus('변환할 테이블 데이터가 없습니다.', 'error');
         return;
@@ -44,11 +45,12 @@ function convertExcelToMarkdown() {
     try {
         const headerCount = excelTableData[0].length;
         let markdown = '';
+
         excelTableData.forEach((row, rowIndex) => {
             const processedRow = row.map(cell => String(cell || '').replace(/\n/g, '<br>'));
             while (processedRow.length < headerCount) { processedRow.push(''); }
             markdown += `| ${processedRow.slice(0, headerCount).join(' | ')} |\n`;
-            if (rowIndex === 0) {
+            if (includeSeparator && rowIndex === 0) {
                 markdown += `|${' --- |'.repeat(headerCount)}\n`;
             }
         });
