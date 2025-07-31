@@ -365,6 +365,64 @@ th {
     font-weight: 600;
 }
 
+/* PPT 업로드 영역 스타일 */
+.file-upload-area {
+    text-align: center;
+    padding: 20px;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.file-upload-area:hover {
+    border-color: #007bff;
+    background-color: #f0f8ff;
+}
+
+.upload-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    font-family: inherit;
+}
+
+.upload-btn:hover {
+    background-color: #0056b3;
+}
+
+.upload-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.file-info {
+    margin-top: 15px;
+}
+
+.file-details {
+    background-color: white;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    text-align: left;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.file-details strong {
+    color: #333;
+}
+
+.file-details small {
+    color: #666;
+}
+
 @media (max-width: 1024px) {
     body {
         padding: 0;
