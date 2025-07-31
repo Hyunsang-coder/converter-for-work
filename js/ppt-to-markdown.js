@@ -205,24 +205,32 @@ function convertSlidesToMarkdown(slideData) {
             textContent = extractAllStrings(slide);
         }
         
-        // 마크다운으로 변환
+        // 마크다운으로 변환 - 리스트 자동 변환 기능 추가
         if (textContent.length > 0) {
             textContent.forEach(text => {
                 if (text && typeof text === 'string' && text.trim()) {
                     const cleanText = text.trim();
-                    // 간단한 목록 처리
-                    if (cleanText.includes('\n• ') || cleanText.includes('\n- ')) {
+                    
+                    // 여러 줄 텍스트인지 확인
+                    if (cleanText.includes('\n')) {
                         const lines = cleanText.split('\n');
                         lines.forEach(line => {
-                            const trimmedLine = line.trim();
-                            if (trimmedLine.startsWith('• ') || trimmedLine.startsWith('- ')) {
-                                markdown += `- ${trimmedLine.substring(2)}\n`;
-                            } else if (trimmedLine) {
-                                markdown += `${trimmedLine}\n\n`;
+                            const convertedLine = convertLineToMarkdownList(line);
+                            if (convertedLine) {
+                                markdown += convertedLine + '\n';
                             }
                         });
+                        markdown += '\n'; // 블록 단위 구분
                     } else {
-                        markdown += `${cleanText}\n\n`;
+                        // 단일 줄 텍스트도 리스트 변환 적용
+                        const convertedLine = convertLineToMarkdownList(cleanText);
+                        if (convertedLine !== cleanText && (convertedLine.startsWith('- ') || /^\d+\.\s/.test(convertedLine))) {
+                            // 리스트로 변환된 경우
+                            markdown += convertedLine + '\n\n';
+                        } else {
+                            // 일반 텍스트
+                            markdown += `${convertedLine}\n\n`;
+                        }
                     }
                 }
             });
@@ -237,6 +245,70 @@ function convertSlidesToMarkdown(slideData) {
     });
 
     return markdown.trim();
+}
+
+// PPT 리스트를 마크다운 리스트로 변환하는 함수
+function convertLineToMarkdownList(line) {
+    if (!line || typeof line !== 'string') return '';
+    
+    line = line.trim();
+    if (!line) return '';
+    
+    // 불릿 리스트 패턴들
+    if (line.startsWith('• ')) {
+        return `- ${line.substring(2)}`;
+    }
+    if (line.startsWith('– ') || line.startsWith('— ')) {
+        return `- ${line.substring(2)}`;
+    }
+    if (line.startsWith('- ')) {
+        return `- ${line.substring(2)}`;
+    }
+    if (line.startsWith('* ')) {
+        return `- ${line.substring(2)}`;
+    }
+    
+    // 단독 불릿 기호들 (공백 없이)
+    if (line.startsWith('•')) {
+        return `- ${line.substring(1).trim()}`;
+    }
+    if (line.startsWith('–') || line.startsWith('—')) {
+        return `- ${line.substring(1).trim()}`;
+    }
+    
+    // 숫자 리스트 (1. 2. 3. 형태)
+    if (/^\d+\.\s+/.test(line)) {
+        return line; // 마크다운에서 그대로 지원
+    }
+    
+    // 숫자 리스트 (1) 2) 형태)
+    if (/^\d+\)\s+/.test(line)) {
+        const match = line.match(/^(\d+)\)\s+(.+)$/);
+        if (match) {
+            return `${match[1]}. ${match[2]}`;
+        }
+    }
+    
+    // 원형 숫자 기호 (① ② ③ 등)
+    if (/^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳]/.test(line)) {
+        return `- ${line.substring(1).trim()}`;
+    }
+    
+    // 알파벳 리스트 (a. b. c. 또는 A. B. C.)
+    if (/^[a-zA-Z]\.\s+/.test(line)) {
+        return `- ${line.substring(2).trim()}`;
+    }
+    
+    // 로마 숫자 (i. ii. iii. 또는 I. II. III.)
+    if (/^(i{1,3}v?|iv|v|vi{0,3}|ix|x|I{1,3}V?|IV|V|VI{0,3}|IX|X)\.\s+/i.test(line)) {
+        const match = line.match(/^[ivxIVX]+\.\s+(.+)$/);
+        if (match) {
+            return `- ${match[1]}`;
+        }
+    }
+    
+    // 기타는 그대로 반환
+    return line;
 }
 
 function extractTextFromItem(item) {
@@ -325,12 +397,15 @@ function cleanTextContent(text) {
         }
     }
     
-    // SVG Path 데이터 제거 (가장 흔한 노이즈)
+    // SVG Path 데이터 제거 (가장 흔한 노이즈) - 대폭 강화
     const svgPathPatterns = [
-        /^M\s*[\d\s.,L]+$/i, // SVG path commands (M, L 등)
-        /^M\s*[\d\s.,LQZ]+$/i, // 더 복잡한 SVG path (Q, Z 포함)
-        /^M[\d\s.,LQCZ]+z?$/i, // 완전한 SVG path
-        /^[MLQ]\s*[\d\s.,]+[Zz]?$/i // 간단한 SVG 명령어들
+        /^M\s*[\d\s.,L]+$/i, // 기본 SVG path (M, L)
+        /^M\s*[\d\s.,LQZ]+$/i, // 복잡한 SVG path (Q, Z 포함)
+        /^M[\d\s.,LQCAZS]+z?$/i, // 완전한 SVG path
+        /^[MLQCAZS]\s*[\d\s.,]+[Zz]?$/i, // 모든 SVG 명령어들
+        /^M[\d\s.,LQCAZS\-e]+$/i, // 과학적 표기법 포함 (e-15 등)
+        /M\s*[\d\s.,-]+[LAZ][\d\s.,-]*$/i, // 복합 경로
+        /^M\s*[\d\s.,-]+L[\d\s.,-]+A[\d\s.,-]+z?$/i // M-L-A 조합
     ];
     
     for (const pattern of svgPathPatterns) {
@@ -339,27 +414,63 @@ function cleanTextContent(text) {
         }
     }
     
-    // PowerPoint 도형 및 스타일/메타데이터 제거
+    // 매우 긴 텍스트 (500자 이상)는 SVG 경로일 가능성이 높음
+    if (cleaned.length > 500 && /[ML]\s*[\d\s.,-]+/.test(cleaned)) {
+        return '';
+    }
+    
+    // PowerPoint 도형 및 스타일/메타데이터 제거 - 대폭 강화
     const metadataPatterns = [
-        /^color$/i,
-        /^solid$/i,
-        /^shape$/i,
-        /^rect$/i,
-        /^line$/i,
-        /^text$/i,
-        /^up$/i,
-        /^mid$/i,
-        /^roundRect$/i, // PowerPoint 도형 타입
-        /^chevron$/i, // PowerPoint 도형 타입
-        /^arrow$/i, // PowerPoint 도형 타입
-        /^oval$/i, // PowerPoint 도형 타입
-        /^table$/i, // 테이블 메타데이터 (실제 테이블 데이터와 구분)
+        // 기본 도형 타입들
+        /^color$/i, /^solid$/i, /^shape$/i, /^rect$/i, /^line$/i, /^text$/i,
+        /^up$/i, /^mid$/i, /^group$/i, /^table$/i,
+        
+        // PowerPoint 도형 타입들 - 대폭 확장
+        /^roundRect$/i, /^chevron$/i, /^arrow$/i, /^oval$/i, /^ellipse$/i,
+        /^pie$/i, /^leftBrace$/i, /^rightArrow$/i, /^rightBrace$/i, /^downArrow$/i,
+        /^triangle$/i, /^homePlate$/i, /^dashed$/i, /^dotted$/i,
+        /^straightConnector\d*$/i, /^bentConnector\d*$/i,
+        /^wedgeRectCallout$/i,
+        
+        // 한국어 도형 이름들 (번호 포함) - 대폭 강화
+        /^직사각형\s*\d*$/i, /^타원\s*\d*$/i, 
+        /^부분\s*원형\s*\d*$/i, /^원형\s*\d*$/i,
+        /^직선\s*연결선\s*\d*$/i, // "직선 연결선 6"
+        /^직선\s*화살표?\s*연결선?\s*\d*$/i,
+        /^화살표\s*:?\s*갈매기형\s*수장\s*\d*$/i, // "화살표: 갈매기형 수장 12"
+        /^화살표\s*:?\s*오른쪽\s*\d*$/i, // "화살표: 오른쪽 3"
+        /^화살표\s*:?\s*왼쪽\s*\d*$/i,
+        /^화살표\s*:?\s*\S*\s*\d*$/i, // 모든 화살표 변형
+        /^사각형\s*:?\s*둥근\s*모서리\s*\d*$/i,
+        /^사각형\s*:?\s*\S*\s*\d*$/i, // 모든 사각형 변형
+        /^왼쪽\s*중괄호\s*\d*$/i, // "왼쪽 중괄호 13"
+        /^오른쪽\s*중괄호\s*\d*$/i,
+        /^갈매기형\s*수장\s*\d*$/i,
+        
+        // 포괄적 한글 도형명 패턴 (안전장치)
+        /^[가-힣\s:]+\d+$/i, // "한글단어들 + 숫자"
+        /^[가-힣\s:]+[가-힣]+\s+\d+$/i, // "한글 도형명 + 공백 + 숫자"
+        
+        // PPT 내부 객체명들
+        /^Text\s*\d*$/i, // Text 4, Text 5 등
+        /^Shape\s*\d*$/i, // Shape 1, Shape 2 등
+        /^TextBox\s*\d*$/i, // TextBox 1, TextBox 2 등
+        /^Process$/i, // 다이어그램 프로세스
+        /^EOD$/i, // 슬라이드 마지막 표시
+        
+        // 포괄적 도형/객체명 패턴 (강력한 안전장치)
+        /^.*Connector\s*\d*$/i, // 모든 Connector 종류
+        /^.*Callout\s*\d*$/i, // 모든 Callout 종류
+        /^.*(Connector|Callout|Arrow|Brace|Rect|dashed|dotted|triangle|homePlate|Text|Shape)[\s\d:]*$/i,
+        
+        // 기타 메타데이터
         /^#[0-9a-f]{6,8}$/i, // 색상 코드
-        /^TextBox\s+\d+$/i,
-        /^직사각형\s*:?\s*(둥근\s*모서리\s*\d+)?$/i, // 한국어 도형 설명
-        /^화살표\s*:?\s*(갈매기형\s*수장\s*\d+)?$/i, // 한국어 화살표 설명
-        /^직선\s+연결선\s+\d+$/i,
-        /^사각형\s*:?\s*둥근\s*모서리\s*\d+$/i
+        
+        // 단독으로 나타나는 의미없는 단어들
+        /^group$/i, /^table$/i, /^pie$/i,
+        
+        // 숫자만 있는 경우 (좌표값일 가능성)
+        /^\d+$/, /^\d+\.\d+$/
     ];
     
     for (const pattern of metadataPatterns) {
