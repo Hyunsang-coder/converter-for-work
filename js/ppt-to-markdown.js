@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const convertBtn = document.getElementById('pptConvertBtn');
     const fileInfo = document.getElementById('pptFileInfo');
 
-    fileInput.addEventListener('change', function (event) {
+    fileInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
             fileInfo.textContent = `선택된 파일: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
@@ -20,14 +20,14 @@ async function convertPptToMarkdown() {
     const fileInput = document.getElementById('pptFileInput');
     const output = document.getElementById('pptMarkdownOutput');
     const copyBtn = document.getElementById('pptCopyBtn');
-
+    
     if (!fileInput.files[0]) {
         showStatus('PPT 파일을 선택해주세요.', 'error');
         return;
     }
 
     const file = fileInput.files[0];
-
+    
     // 파일 형식 확인
     if (!file.name.toLowerCase().endsWith('.pptx')) {
         showStatus('현재 .pptx 파일만 지원됩니다.', 'error');
@@ -36,7 +36,7 @@ async function convertPptToMarkdown() {
 
     try {
         showStatus('PPT 파일을 분석하고 있습니다...', 'info');
-
+        
         // pptxtojson 라이브러리 사용 가능 여부 확인
         if (typeof pptxtojson === 'undefined') {
             throw new Error('PPT 파서 라이브러리가 로드되지 않았습니다.');
@@ -44,10 +44,10 @@ async function convertPptToMarkdown() {
 
         // 파일을 ArrayBuffer로 읽기
         const arrayBuffer = await readFileAsArrayBuffer(file);
-
+        
         // pptxtojson으로 PPT 파싱 - 라이브러리 API에 맞게 수정
         let slideData;
-
+        
         // 다양한 가능한 API 패턴 시도
         if (typeof pptxtojson.parse === 'function') {
             slideData = await pptxtojson.parse(arrayBuffer);
@@ -64,17 +64,17 @@ async function convertPptToMarkdown() {
             const availableMethods = Object.keys(pptxtojson).filter(key => typeof pptxtojson[key] === 'function');
             throw new Error(`PPT 파서 라이브러리의 올바른 함수를 찾을 수 없습니다. 사용 가능한 메소드: ${availableMethods.join(', ')}`);
         }
-
+        
         // 슬라이드 데이터를 마크다운으로 변환
         const markdown = convertSlidesToMarkdown(slideData);
-
+        
         output.value = markdown;
         copyBtn.disabled = false;
         showStatus(`✅ PPT 파일이 성공적으로 변환되었습니다.`, 'success');
-
+        
     } catch (error) {
         console.error('PPT 변환 오류:', error);
-
+        
         // 에러 발생 시 대안 방법 안내
         const errorMessage = `# PPT 변환 중 오류 발생
 
@@ -143,7 +143,7 @@ function readFileAsArrayBuffer(file) {
 function convertSlidesToMarkdown(slideData) {
     // 다양한 데이터 구조 처리
     let slides = [];
-
+    
     if (Array.isArray(slideData)) {
         slides = slideData;
     } else if (slideData && slideData.slides && Array.isArray(slideData.slides)) {
@@ -171,16 +171,16 @@ function convertSlidesToMarkdown(slideData) {
 
     slides.forEach((slide, index) => {
         markdown += `## 슬라이드 ${index + 1}\n\n`;
-
+        
         // 제목 추출 (다양한 필드명 지원)
         const title = slide.title || slide.name || slide.slideTitle || slide.header;
         if (title && typeof title === 'string' && title.trim()) {
             markdown += `### ${title.trim()}\n\n`;
         }
-
+        
         // 텍스트 콘텐츠 추출
         let textContent = [];
-
+        
         // 다양한 텍스트 필드 확인
         if (slide.content && Array.isArray(slide.content)) {
             slide.content.forEach(item => {
@@ -199,18 +199,18 @@ function convertSlidesToMarkdown(slideData) {
         } else if (slide.texts && Array.isArray(slide.texts)) {
             textContent = textContent.concat(slide.texts.filter(t => typeof t === 'string'));
         }
-
+        
         // 텍스트가 없으면 객체의 모든 문자열 값 수집
         if (textContent.length === 0 && typeof slide === 'object') {
             textContent = extractAllStrings(slide);
         }
-
+        
         // 마크다운으로 변환 - 리스트 자동 변환 기능 추가
         if (textContent.length > 0) {
             textContent.forEach(text => {
                 if (text && typeof text === 'string' && text.trim()) {
                     const cleanText = text.trim();
-
+                    
                     // 여러 줄 텍스트인지 확인
                     if (cleanText.includes('\n')) {
                         const lines = cleanText.split('\n');
@@ -237,7 +237,7 @@ function convertSlidesToMarkdown(slideData) {
         } else {
             markdown += `_이 슬라이드에는 텍스트 내용이 없습니다._\n\n`;
         }
-
+        
         // 슬라이드 구분선
         if (index < slides.length - 1) {
             markdown += `---\n\n`;
@@ -250,10 +250,10 @@ function convertSlidesToMarkdown(slideData) {
 // PPT 리스트를 마크다운 리스트로 변환하는 함수
 function convertLineToMarkdownList(line) {
     if (!line || typeof line !== 'string') return '';
-
+    
     line = line.trim();
     if (!line) return '';
-
+    
     // 불릿 리스트 패턴들
     if (line.startsWith('• ')) {
         return `- ${line.substring(2)}`;
@@ -267,7 +267,7 @@ function convertLineToMarkdownList(line) {
     if (line.startsWith('* ')) {
         return `- ${line.substring(2)}`;
     }
-
+    
     // 단독 불릿 기호들 (공백 없이)
     if (line.startsWith('•')) {
         return `- ${line.substring(1).trim()}`;
@@ -275,12 +275,12 @@ function convertLineToMarkdownList(line) {
     if (line.startsWith('–') || line.startsWith('—')) {
         return `- ${line.substring(1).trim()}`;
     }
-
+    
     // 숫자 리스트 (1. 2. 3. 형태)
     if (/^\d+\.\s+/.test(line)) {
         return line; // 마크다운에서 그대로 지원
     }
-
+    
     // 숫자 리스트 (1) 2) 형태)
     if (/^\d+\)\s+/.test(line)) {
         const match = line.match(/^(\d+)\)\s+(.+)$/);
@@ -288,17 +288,17 @@ function convertLineToMarkdownList(line) {
             return `${match[1]}. ${match[2]}`;
         }
     }
-
+    
     // 원형 숫자 기호 (① ② ③ 등)
     if (/^[①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳]/.test(line)) {
         return `- ${line.substring(1).trim()}`;
     }
-
+    
     // 알파벳 리스트 (a. b. c. 또는 A. B. C.)
     if (/^[a-zA-Z]\.\s+/.test(line)) {
         return `- ${line.substring(2).trim()}`;
     }
-
+    
     // 로마 숫자 (i. ii. iii. 또는 I. II. III.)
     if (/^(i{1,3}v?|iv|v|vi{0,3}|ix|x|I{1,3}V?|IV|V|VI{0,3}|IX|X)\.\s+/i.test(line)) {
         const match = line.match(/^[ivxIVX]+\.\s+(.+)$/);
@@ -306,14 +306,14 @@ function convertLineToMarkdownList(line) {
             return `- ${match[1]}`;
         }
     }
-
+    
     // 기타는 그대로 반환
     return line;
 }
 
 function extractTextFromItem(item) {
     const texts = [];
-
+    
     if (typeof item === 'string') {
         // 이상한 문자들 필터링
         const cleanText = cleanTextContent(item);
@@ -329,7 +329,7 @@ function extractTextFromItem(item) {
                 return texts; // 테이블을 찾았으면 다른 텍스트는 무시
             }
         }
-
+        
         // 다양한 텍스트 필드 확인
         if (item.text && typeof item.text === 'string') {
             const cleanText = cleanTextContent(item.text);
@@ -343,7 +343,7 @@ function extractTextFromItem(item) {
             const cleanText = cleanTextContent(item.value);
             if (cleanText) texts.push(cleanText);
         }
-
+        
         // 목록 처리
         if (item.type === 'list' && item.items && Array.isArray(item.items)) {
             item.items.forEach(listItem => {
@@ -356,14 +356,14 @@ function extractTextFromItem(item) {
                 }
             });
         }
-
+        
         // 중첩된 배열 처리
         if (item.texts && Array.isArray(item.texts)) {
             item.texts.forEach(subItem => {
                 texts.push(...extractTextFromItem(subItem));
             });
         }
-
+        
         // shapes 배열 처리 (테이블이 여기 있을 수 있음)
         if (item.shapes && Array.isArray(item.shapes)) {
             item.shapes.forEach(shape => {
@@ -371,17 +371,17 @@ function extractTextFromItem(item) {
             });
         }
     }
-
+    
     return texts;
 }
 
 // 텍스트 내용 정리 함수 - HTML 태그 제거 및 정리
 function cleanTextContent(text) {
     if (!text || typeof text !== 'string') return '';
-
+    
     // HTML 태그에서 텍스트만 추출
     let cleaned = extractTextFromHTML(text);
-
+    
     // 이미지 관련 텍스트 무시
     const imagePatterns = [
         /^image\d+/i,
@@ -390,13 +390,13 @@ function cleanTextContent(text) {
         /^rId\d+$/,
         /^slide\d+\.xml$/i
     ];
-
+    
     for (const pattern of imagePatterns) {
         if (pattern.test(cleaned.trim())) {
             return '';
         }
     }
-
+    
     // SVG Path 데이터 제거 (가장 흔한 노이즈) - 대폭 강화
     const svgPathPatterns = [
         /^M\s*[\d\s.,L]+$/i, // 기본 SVG path (M, L)
@@ -407,33 +407,33 @@ function cleanTextContent(text) {
         /M\s*[\d\s.,-]+[LAZ][\d\s.,-]*$/i, // 복합 경로
         /^M\s*[\d\s.,-]+L[\d\s.,-]+A[\d\s.,-]+z?$/i // M-L-A 조합
     ];
-
+    
     for (const pattern of svgPathPatterns) {
         if (pattern.test(cleaned.trim())) {
             return '';
         }
     }
-
+    
     // 매우 긴 텍스트 (500자 이상)는 SVG 경로일 가능성이 높음
     if (cleaned.length > 500 && /[ML]\s*[\d\s.,-]+/.test(cleaned)) {
         return '';
     }
-
+    
     // PowerPoint 도형 및 스타일/메타데이터 제거 - 대폭 강화
     const metadataPatterns = [
         // 기본 도형 타입들
         /^color$/i, /^solid$/i, /^shape$/i, /^rect$/i, /^line$/i, /^text$/i,
         /^up$/i, /^mid$/i, /^group$/i, /^table$/i,
-
+        
         // PowerPoint 도형 타입들 - 대폭 확장
         /^roundRect$/i, /^chevron$/i, /^arrow$/i, /^oval$/i, /^ellipse$/i,
         /^pie$/i, /^leftBrace$/i, /^rightArrow$/i, /^rightBrace$/i, /^downArrow$/i,
         /^triangle$/i, /^homePlate$/i, /^dashed$/i, /^dotted$/i,
         /^straightConnector\d*$/i, /^bentConnector\d*$/i,
         /^wedgeRectCallout$/i,
-
+        
         // 한국어 도형 이름들 (번호 포함) - 대폭 강화
-        /^직사각형\s*\d*$/i, /^타원\s*\d*$/i,
+        /^직사각형\s*\d*$/i, /^타원\s*\d*$/i, 
         /^부분\s*원형\s*\d*$/i, /^원형\s*\d*$/i,
         /^직선\s*연결선\s*\d*$/i, // "직선 연결선 6"
         /^직선\s*화살표?\s*연결선?\s*\d*$/i,
@@ -446,39 +446,39 @@ function cleanTextContent(text) {
         /^왼쪽\s*중괄호\s*\d*$/i, // "왼쪽 중괄호 13"
         /^오른쪽\s*중괄호\s*\d*$/i,
         /^갈매기형\s*수장\s*\d*$/i,
-
+        
         // 포괄적 한글 도형명 패턴 (안전장치)
         /^[가-힣\s:]+\d+$/i, // "한글단어들 + 숫자"
         /^[가-힣\s:]+[가-힣]+\s+\d+$/i, // "한글 도형명 + 공백 + 숫자"
-
+        
         // PPT 내부 객체명들
         /^Text\s*\d*$/i, // Text 4, Text 5 등
         /^Shape\s*\d*$/i, // Shape 1, Shape 2 등
         /^TextBox\s*\d*$/i, // TextBox 1, TextBox 2 등
         /^Process$/i, // 다이어그램 프로세스
         /^EOD$/i, // 슬라이드 마지막 표시
-
+        
         // 포괄적 도형/객체명 패턴 (강력한 안전장치)
         /^.*Connector\s*\d*$/i, // 모든 Connector 종류
         /^.*Callout\s*\d*$/i, // 모든 Callout 종류
         /^.*(Connector|Callout|Arrow|Brace|Rect|dashed|dotted|triangle|homePlate|Text|Shape)[\s\d:]*$/i,
-
+        
         // 기타 메타데이터
         /^#[0-9a-f]{6,8}$/i, // 색상 코드
-
+        
         // 단독으로 나타나는 의미없는 단어들
         /^group$/i, /^table$/i, /^pie$/i,
-
+        
         // 숫자만 있는 경우 (좌표값일 가능성)
         /^\d+$/, /^\d+\.\d+$/
     ];
-
+    
     for (const pattern of metadataPatterns) {
         if (pattern.test(cleaned.trim())) {
             return '';
         }
     }
-
+    
     // 이상한 숫자/문자 조합 제거 (PowerPoint 내부 코드)
     cleaned = cleaned
         .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // 제어 문자 제거
@@ -489,34 +489,34 @@ function cleanTextContent(text) {
         .replace(/&nbsp;/g, ' ') // HTML non-breaking space
         .replace(/\s+/g, ' ') // 여러 공백을 하나로
         .trim();
-
+    
     // 너무 짧은 의미없는 텍스트 제거
     if (cleaned.length < 3) return '';
-
+    
     // 숫자만 있는 경우도 제거 (테이블 데이터가 아닌 경우)
     if (/^\d+\.?\d*$/.test(cleaned) && cleaned.length < 4) return '';
-
+    
     // 의미 있는 퍼센트 값은 유지 (예: 14%, 15%)
     if (/^\d{1,3}%$/.test(cleaned)) return cleaned;
-
+    
     return cleaned;
 }
 
 // HTML 태그에서 텍스트만 추출
 function extractTextFromHTML(htmlString) {
     if (!htmlString || typeof htmlString !== 'string') return '';
-
+    
     // HTML 태그가 없으면 그대로 반환
     if (!htmlString.includes('<')) return htmlString;
-
+    
     try {
         // 임시 DOM 요소 생성해서 텍스트만 추출
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlString;
-
+        
         // 모든 텍스트 노드에서 텍스트 추출
         let textContent = tempDiv.textContent || tempDiv.innerText || '';
-
+        
         // <br>, <p> 태그를 줄바꿈으로 처리
         textContent = htmlString
             .replace(/<br\s*\/?>/gi, '\n')
@@ -529,7 +529,7 @@ function extractTextFromHTML(htmlString) {
             .replace(/&quot;/g, '"')
             .replace(/\s+/g, ' ')
             .trim();
-
+        
         return textContent;
     } catch (error) {
         // HTML 파싱 실패시 태그만 간단히 제거
@@ -544,7 +544,7 @@ function extractTextFromHTML(htmlString) {
 // 테이블 객체인지 확인
 function isTableObject(item) {
     if (!item || typeof item !== 'object') return false;
-
+    
     // 다양한 테이블 형태 확인
     return (
         (item.type === 'table') ||
@@ -559,7 +559,7 @@ function isTableObject(item) {
 // 테이블을 마크다운으로 변환
 function convertToMarkdownTable(tableObj) {
     let rows = [];
-
+    
     // 다양한 테이블 구조에서 행 데이터 추출
     if (tableObj.rows && Array.isArray(tableObj.rows)) {
         rows = tableObj.rows;
@@ -576,16 +576,16 @@ function convertToMarkdownTable(tableObj) {
             rows.push(tableObj.cells.slice(i, i + cellsPerRow));
         }
     }
-
+    
     if (!rows || rows.length === 0) return null;
-
+    
     // 테이블 데이터 처리
     const processedRows = [];
     let maxCols = 0;
-
+    
     rows.forEach(row => {
         let cells = [];
-
+        
         if (Array.isArray(row)) {
             cells = row;
         } else if (row.cells && Array.isArray(row.cells)) {
@@ -596,10 +596,10 @@ function convertToMarkdownTable(tableObj) {
             // 객체의 값들을 셀로 처리
             cells = Object.values(row);
         }
-
+        
         const processedCells = cells.map(cell => {
             let cellText = '';
-
+            
             if (typeof cell === 'string') {
                 cellText = cleanTextContent(cell);
             } else if (cell && typeof cell === 'object') {
@@ -614,51 +614,51 @@ function convertToMarkdownTable(tableObj) {
                     cellText = strings.join(' ');
                 }
             }
-
+            
             return cellText || '';
         });
-
+        
         if (processedCells.some(cell => cell.length > 0)) {
             processedRows.push(processedCells);
             maxCols = Math.max(maxCols, processedCells.length);
         }
     });
-
+    
     if (processedRows.length === 0 || maxCols === 0) return null;
-
+    
     // 모든 행을 같은 열 수로 맞춤
     processedRows.forEach(row => {
         while (row.length < maxCols) {
             row.push('');
         }
     });
-
+    
     // 마크다운 테이블 생성
     let markdownTable = '\n';
-
+    
     // 첫 번째 행 (헤더로 처리)
     if (processedRows.length > 0) {
         const headerRow = processedRows[0].map(cell => cell || '').join(' | ');
         markdownTable += `| ${headerRow} |\n`;
-
+        
         // 구분선
         const separator = Array(maxCols).fill('---').join(' | ');
         markdownTable += `| ${separator} |\n`;
-
+        
         // 나머지 행들
         for (let i = 1; i < processedRows.length; i++) {
             const dataRow = processedRows[i].map(cell => cell || '').join(' | ');
             markdownTable += `| ${dataRow} |\n`;
         }
     }
-
+    
     markdownTable += '\n';
     return markdownTable;
 }
 
 function extractAllStrings(obj) {
     const strings = [];
-
+    
     if (typeof obj === 'string') {
         const cleanText = cleanTextContent(obj);
         if (cleanText) {
@@ -673,12 +673,12 @@ function extractAllStrings(obj) {
         if (obj.type === 'image' || obj.image || obj.picture || obj.blip) {
             return strings;
         }
-
+        
         Object.values(obj).forEach(value => {
             strings.push(...extractAllStrings(value));
         });
     }
-
+    
     return strings;
 }
 
@@ -688,7 +688,7 @@ function clearPptTool() {
     const copyBtn = document.getElementById('pptCopyBtn');
     const convertBtn = document.getElementById('pptConvertBtn');
     const fileInfo = document.getElementById('pptFileInfo');
-
+    
     fileInput.value = '';
     output.value = '';
     fileInfo.textContent = '';

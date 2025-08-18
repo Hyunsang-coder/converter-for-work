@@ -190,12 +190,10 @@ body {
     flex-shrink: 0;
 }
 
-/* === 입력/출력 영역 (스크롤바로 페이지 확장 방지) === */
+/* === 입력/출력 영역 (div + overflow로 문제 해결) === */
 .input-area {
     width: 100%;
-    flex: 1 1 0;
-    max-height: 400px;
-    min-height: 120px;
+    flex-grow: 1;
     border: 2px solid #e0e7ff;
     border-radius: 10px;
     padding: 15px;
@@ -204,10 +202,9 @@ body {
     line-height: 1.6;
     background: white;
     resize: none;
-    overflow-y: auto;
-    overflow-x: hidden;
-    overflow-anchor: none;
-    scroll-behavior: smooth;
+    min-height: 0;
+    overflow: auto;
+    /* 핵심: overflow 해결 */
 }
 
 .input-area:focus {
@@ -222,9 +219,7 @@ body {
 
 textarea {
     width: 100%;
-    flex: 1 1 0;
-    max-height: 400px;
-    min-height: 120px;
+    flex-grow: 1;
     border: 2px solid #e0e7ff;
     border-radius: 10px;
     padding: 15px;
@@ -233,10 +228,8 @@ textarea {
     line-height: 1.6;
     background: white;
     resize: none;
-    overflow-y: auto;
-    overflow-x: hidden;
-    overflow-anchor: none;
-    scroll-behavior: smooth;
+    min-height: 0;
+    overflow: auto;
 }
 
 textarea:focus {
@@ -349,36 +342,6 @@ textarea:focus {
 .btn-secondary {
     background: #6b7280;
     color: white;
-}
-
-/* 크로스 브라우저 스크롤바 스타일 */
-.input-area::-webkit-scrollbar,
-textarea::-webkit-scrollbar {
-    width: 8px;
-}
-
-.input-area::-webkit-scrollbar-track,
-textarea::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-
-.input-area::-webkit-scrollbar-thumb,
-textarea::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 10px;
-}
-
-.input-area::-webkit-scrollbar-thumb:hover,
-textarea::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* Firefox 스크롤바 */
-.input-area,
-textarea {
-    scrollbar-width: thin;
-    scrollbar-color: #c1c1c1 #f1f1f1;
 }
 
 /* 테이블 스타일 */
@@ -504,12 +467,5 @@ th {
 
     .tool-content {
         padding: 15px;
-    }
-    
-    /* 모바일에서 입력 영역 높이 조정 */
-    .input-area,
-    textarea {
-        max-height: 300px;
-        min-height: 100px;
     }
 }
