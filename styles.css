@@ -5,6 +5,8 @@
     --light-gray: #f9fafb;
     --border-color: #e5e7eb;
     --white: #ffffff;
+    --shortcut-color: #6b7280;
+    --shortcut-bg: #f3f4f6;
 }
 
 * {
@@ -357,6 +359,33 @@ textarea:focus {
 .btn-secondary {
     background: #6b7280;
     color: white;
+}
+
+/* 단축키 힌트 스타일 */
+.shortcut-hint {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 3px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px;
+}
+
+/* 버튼 내에서 단축키 힌트 레이아웃 */
+button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+/* 액션 버튼들은 가로로 배치하되 내부는 세로 */
+.action-buttons button {
+    flex-direction: column;
+    align-items: center;
 }
 
 /* 크로스 브라우저 스크롤바 스타일 */

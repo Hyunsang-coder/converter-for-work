@@ -30,12 +30,18 @@
                 </div>
                 <div class="conversion-arrow">
                     <button class="arrow-btn" id="htmlConvertBtn" onclick="convertHtmlToMarkdown()" disabled>
-                        마크다운 변환</button>
+                        마크다운 변환
+                        <small class="shortcut-hint">(⌘1)</small>
+                    </button>
                     <div class="action-buttons">
                         <button class="btn btn-copy"
                             onclick="copyToClipboard(document.getElementById('htmlMarkdownOutput').value)"
-                            id="htmlCopyBtn" disabled>클립보드에 복사</button>
-                        <button class="btn btn-secondary" onclick="clearHtmlTool()">🗑️ 초기화</button>
+                            id="htmlCopyBtn" disabled>클립보드에 복사
+                            <small class="shortcut-hint">(⌘2)</small>
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearHtmlTool()">🗑️ 초기화
+                            <small class="shortcut-hint">(⌘3)</small>
+                        </button>
                     </div>
                 </div>
                 <div class="section-container">
@@ -56,13 +62,19 @@
                 </div>
                 <div class="conversion-arrow">
                     <button class="arrow-btn" id="excelConvertBtn" onclick="convertExcelToMarkdown()" disabled>
-                        마크다운 변환</button>
+                        마크다운 변환
+                        <small class="shortcut-hint">(⌘1)</small>
+                    </button>
 
                     <div class="action-buttons">
                         <button class="btn btn-copy"
                             onclick="copyToClipboard(document.getElementById('excelMarkdownOutput').value)"
-                            id="excelCopyBtn" disabled>클립보드에 복사</button>
-                        <button class="btn btn-secondary" onclick="clearExcelTool()">🗑️ 초기화</button>
+                            id="excelCopyBtn" disabled>클립보드에 복사
+                            <small class="shortcut-hint">(⌘2)</small>
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearExcelTool()">🗑️ 초기화
+                            <small class="shortcut-hint">(⌘3)</small>
+                        </button>
                     </div>
                 </div>
                 <div class="section-container">
@@ -88,12 +100,18 @@
                 </div>
                 <div class="conversion-arrow">
                     <button class="arrow-btn" id="markdownConvertBtn" onclick="convertMarkdownToExcel()" disabled>
-                        엑셀 변환</button>
+                        엑셀 변환
+                        <small class="shortcut-hint">(⌘1)</small>
+                    </button>
                     <div class="action-buttons">
                         <button class="btn btn-copy" onclick="copyToClipboard(markdownTsvData)" id="markdownCopyBtn"
                             disabled>
-                            클립보드에 복사</button>
-                        <button class="btn btn-secondary" onclick="clearMarkdownTool()">🗑️ 초기화</button>
+                            클립보드에 복사
+                            <small class="shortcut-hint">(⌘2)</small>
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearMarkdownTool()">🗑️ 초기화
+                            <small class="shortcut-hint">(⌘3)</small>
+                        </button>
                     </div>
                 </div>
                 <div class="section-container">

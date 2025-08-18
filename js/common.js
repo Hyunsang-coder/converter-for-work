@@ -124,3 +124,132 @@ function cleanCellContent(html) {
     document.body.removeChild(tempDiv);
     return text.trim();
 }
+
+// --- OS 감지 및 단축키 설정 ---
+const isMac = navigator.userAgent.indexOf('Mac') !== -1;
+const modifierKey = isMac ? 'metaKey' : 'ctrlKey';
+
+// 페이지 로드 시 단축키 표시 업데이트
+document.addEventListener('DOMContentLoaded', function() {
+    updateShortcutHints();
+});
+
+function updateShortcutHints() {
+    const shortcuts = document.querySelectorAll('.shortcut-hint');
+    shortcuts.forEach((hint, index) => {
+        const key = (index % 3) + 1; // 1, 2, 3 순서로 할당
+        hint.textContent = `⌘+${key} / Ctrl+${key}`;
+    });
+}
+
+// --- 키보드 단축키 ---
+document.addEventListener('keydown', function(e) {
+    // Cmd/Ctrl+1: 현재 도구의 변환 실행
+    if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '1') {
+        e.preventDefault();
+        executeCurrentToolConversion();
+    }
+    
+    // Cmd/Ctrl+2: 현재 도구의 결과를 클립보드에 복사
+    if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '2') {
+        e.preventDefault();
+        copyCurrentOutput();
+    }
+    
+    // Cmd/Ctrl+3: 현재 도구 초기화
+    if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '3') {
+        e.preventDefault();
+        clearCurrentTool();
+    }
+});
+
+// 현재 활성화된 도구의 변환 기능 실행
+function executeCurrentToolConversion() {
+    switch(currentTool) {
+        case 1:
+            if (typeof convertHtmlToMarkdown === 'function') {
+                convertHtmlToMarkdown();
+            }
+            break;
+        case 2:
+            if (typeof convertExcelToMarkdown === 'function') {
+                convertExcelToMarkdown();
+            }
+            break;
+        case 3:
+            if (typeof convertMarkdownToExcel === 'function') {
+                convertMarkdownToExcel();
+            }
+            break;
+        case 4:
+            if (typeof convertPptToMarkdown === 'function') {
+                convertPptToMarkdown();
+            }
+            break;
+        default:
+            showStatus('알 수 없는 도구입니다.', 'error');
+    }
+}
+
+// 현재 도구의 출력을 클립보드에 복사
+function copyCurrentOutput() {
+    let outputElement;
+    let toolName;
+    
+    switch(currentTool) {
+        case 1:
+            outputElement = document.getElementById('htmlMarkdownOutput');
+            toolName = 'HTML → Markdown';
+            break;
+        case 2:
+            outputElement = document.getElementById('excelMarkdownOutput');
+            toolName = 'Excel → Markdown';
+            break;
+        case 3:
+            outputElement = document.getElementById('markdownExcelOutput');
+            toolName = 'Markdown → Excel';
+            break;
+        case 4:
+            outputElement = document.getElementById('pptMarkdownOutput');
+            toolName = 'PPT → Markdown';
+            break;
+        default:
+            showStatus('현재 도구를 찾을 수 없습니다.', 'error');
+            return;
+    }
+    
+    if (outputElement && outputElement.value) {
+        copyToClipboard(outputElement.value);
+        showStatus(`📋 ${toolName} 결과가 클립보드에 복사되었습니다!`, 'success');
+    } else {
+        showStatus('복사할 결과가 없습니다. 먼저 변환을 실행해주세요.', 'error');
+    }
+}
+
+// 현재 도구 초기화
+function clearCurrentTool() {
+    switch(currentTool) {
+        case 1:
+            if (typeof clearHtmlTool === 'function') {
+                clearHtmlTool();
+            }
+            break;
+        case 2:
+            if (typeof clearExcelTool === 'function') {
+                clearExcelTool();
+            }
+            break;
+        case 3:
+            if (typeof clearMarkdownTool === 'function') {
+                clearMarkdownTool();
+            }
+            break;
+        case 4:
+            if (typeof clearPptTool === 'function') {
+                clearPptTool();
+            }
+            break;
+        default:
+            showStatus('초기화할 도구를 찾을 수 없습니다.', 'error');
+    }
+}
