@@ -23,7 +23,8 @@ body {
 .container {
     width: 100%;
     max-width: 1600px;
-    min-height: 100vh;
+    height: 100vh;
+    min-height: 0;
     margin: 0 auto;
     background: var(--white);
     display: flex;
@@ -103,6 +104,7 @@ body {
 .tool-content.active {
     display: flex;
     flex-direction: column;
+    min-height: 0;
 }
 
 .workflow-section {
@@ -110,7 +112,10 @@ body {
     gap: 25px;
     align-items: stretch;
     flex-grow: 1;
-    min-height: 0;
+    min-height: 350px;
+    /* allow children to scroll instead of forcing parent to grow */
+    min-width: 0;
+    overflow: hidden;
 }
 
 .section-container {
@@ -122,6 +127,8 @@ body {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .conversion-arrow {
@@ -190,10 +197,13 @@ body {
     flex-shrink: 0;
 }
 
-/* === 입력/출력 영역 (div + overflow로 문제 해결) === */
+/* === 입력/출력 영역 (스크롤바로 페이지 확장 방지) === */
 .input-area {
     width: 100%;
-    flex-grow: 1;
+    flex: 1 1 0;
+    height: auto;
+    max-height: none;
+    min-height: 0;
     border: 2px solid #e0e7ff;
     border-radius: 10px;
     padding: 15px;
@@ -202,9 +212,9 @@ body {
     line-height: 1.6;
     background: white;
     resize: none;
-    min-height: 0;
-    overflow: auto;
-    /* 핵심: overflow 해결 */
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 .input-area:focus {
@@ -219,7 +229,10 @@ body {
 
 textarea {
     width: 100%;
-    flex-grow: 1;
+    flex: 1 1 0;
+    height: auto;
+    max-height: none;
+    min-height: 0;
     border: 2px solid #e0e7ff;
     border-radius: 10px;
     padding: 15px;
@@ -228,8 +241,9 @@ textarea {
     line-height: 1.6;
     background: white;
     resize: none;
-    min-height: 0;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
 textarea:focus {
@@ -246,7 +260,8 @@ textarea:focus {
 }
 
 .table-preview.output {
-    flex-grow: 1;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .empty-state {
@@ -342,6 +357,36 @@ textarea:focus {
 .btn-secondary {
     background: #6b7280;
     color: white;
+}
+
+/* 크로스 브라우저 스크롤바 스타일 */
+.input-area::-webkit-scrollbar,
+textarea::-webkit-scrollbar {
+    width: 8px;
+}
+
+.input-area::-webkit-scrollbar-track,
+textarea::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.input-area::-webkit-scrollbar-thumb,
+textarea::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.input-area::-webkit-scrollbar-thumb:hover,
+textarea::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Firefox 스크롤바 */
+.input-area,
+textarea {
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
 }
 
 /* 테이블 스타일 */
@@ -467,5 +512,12 @@ th {
 
     .tool-content {
         padding: 15px;
+    }
+
+    /* 모바일에서 입력 영역 높이 조정 */
+    .input-area,
+    textarea {
+        max-height: none;
+        min-height: 0;
     }
 }

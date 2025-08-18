@@ -18,7 +18,6 @@
             <button class="tab-btn tab-1 active" onclick="switchTool(1)">🌐 웹페이지 → 마크다운</button>
             <button class="tab-btn tab-2" onclick="switchTool(2)">📊 엑셀 → 마크다운</button>
             <button class="tab-btn tab-3" onclick="switchTool(3)">📋 마크다운 → 엑셀</button>
-            <button class="tab-btn tab-4" onclick="switchTool(4)">📽️ PPT → 마크다운</button>
         </div>
 
         <!-- Tool 1: HTML to Markdown -->
@@ -107,52 +106,15 @@
 
         </div>
 
-        <!-- Tool 4: PPT to Markdown -->
-        <div class="tool-content tool-4" id="tool-4">
-            <div class="workflow-section">
-                <div class="section-container">
-                    <div class="section-title">PPT 파일 업로드</div>
-                    <div class="file-upload-area">
-                        <input type="file" id="pptFileInput" accept=".pptx,.ppt" style="display: none;">
-                        <button class="upload-btn"
-                            onclick="console.log('업로드 버튼 클릭됨'); document.getElementById('pptFileInput').click();">
-                            📁 PPT 파일 선택
-                        </button>
-                        <div id="pptFileInfo" class="file-info"></div>
-                    </div>
-                </div>
-                <div class="conversion-arrow">
-                    <button class="arrow-btn" id="pptConvertBtn" onclick="convertPptToMarkdown()" disabled>
-                        마크다운 변환
-                    </button>
-                    <div class="action-buttons">
-                        <button class="btn btn-copy"
-                            onclick="copyToClipboard(document.getElementById('pptMarkdownOutput').value)"
-                            id="pptCopyBtn" disabled>클립보드에 복사</button>
-                        <button class="btn btn-secondary" onclick="clearPptTool()">🗑️ 초기화</button>
-                    </div>
-                </div>
-                <div class="section-container">
-                    <div class="section-title">마크다운 결과</div>
-                    <textarea id="pptMarkdownOutput" readonly placeholder="변환된 마크다운이 여기에 표시됩니다..."></textarea>
-                </div>
-            </div>
-        </div>
 
         <div id="status" class="status"></div>
     </div>
 
-    <!-- JavaScript 파일들 먼저 로드 -->
+    <!-- JavaScript 파일들 로드 -->
     <script src="js/common.js"></script>
     <script src="js/html-to-markdown.js"></script>
     <script src="js/excel-to-markdown.js"></script>
     <script src="js/markdown-to-excel.js"></script>
-
-    <!-- PPT 파싱을 위한 라이브러리 (로컬 파일) -->
-    <script src="js/pptxtojson.min.js"></script>
-
-    <!-- PPT 모듈은 라이브러리 로드 후에 -->
-    <script src="js/ppt-to-markdown.js"></script>
 </body>
 
 </html>
