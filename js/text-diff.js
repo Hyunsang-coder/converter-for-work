@@ -43,7 +43,7 @@ function renderTextDiff() {
     }
 
     const unifiedDiff = Diff.diffArrays(original.split('\n'), changed.split('\n'));
-    
+
     let html = '';
     let added = 0;
     let removed = 0;
@@ -101,7 +101,7 @@ function renderTextDiff() {
                                 changedContent += escapeHtml(word.value);
                             }
                         });
-                        added++; 
+                        added++;
                         removed++;
                     }
 
@@ -126,12 +126,12 @@ function renderTextDiff() {
             const lines = part.value.split('\n');
             lines.forEach((line, index) => {
                 if (index === lines.length - 1 && line === '') return;
-                
+
                 let sign = part.added ? '+' : part.removed ? '-' : ' ';
                 let lineClass = part.added ? 'diff-line-added' : part.removed ? 'diff-line-deleted' : '';
-                
-                if(part.added) added++;
-                if(part.removed) removed++;
+
+                if (part.added) added++;
+                if (part.removed) removed++;
 
                 html += `
                     <div class="diff-line ${lineClass}">

@@ -223,7 +223,8 @@ body {
 }
 
 /* === 입력/출력 영역 (스크롤바로 페이지 확장 방지) === */
-.input-area, textarea {
+.input-area,
+textarea {
     width: 100%;
     flex: 1 1 0;
     height: 220px;
@@ -433,25 +434,42 @@ textarea:focus {
 .diff-line {
     font-family: 'Menlo', 'Monaco', monospace;
     font-size: 13px;
-    line-height: 1.6;
-    padding: 6px 10px;
+    line-height: 1.4;
+    padding: 2px 0;
     border-bottom: 1px solid #f1f5f9;
     white-space: pre-wrap;
+    min-height: 18px;
+    display: flex;
+    align-items: flex-start;
 }
 
-.diff-line.equal {
-    background: #ffffff;
+.diff-line .gutter {
+    flex-shrink: 0;
+    width: 40px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #6b7280;
+    text-align: right;
+    background: #f9fafb;
+    border-right: 1px solid #e5e7eb;
+    user-select: none;
 }
 
-.diff-line.added {
+.diff-line .content {
+    flex: 1;
+    padding: 2px 8px;
+    overflow-wrap: break-word;
+}
+
+.diff-line.diff-line-added .content {
     background: #ecfdf5;
 }
 
-.diff-line.deleted {
+.diff-line.diff-line-deleted .content {
     background: #fef2f2;
 }
 
-.diff-line.modified {
+.diff-line.diff-line-modified .content {
     background: #eff6ff;
 }
 
@@ -472,7 +490,12 @@ textarea:focus {
 
 .diff-unified .diff-line {
     display: flex;
-    gap: 10px;
+    gap: 0;
+}
+
+.diff-unified .diff-line .gutter {
+    width: 30px;
+    font-size: 10px;
 }
 
 .diff-unified .gutter {
