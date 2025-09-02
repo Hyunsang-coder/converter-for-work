@@ -18,6 +18,7 @@
             <button class="tab-btn tab-1 active" onclick="switchTool(1)">🌐 웹페이지 → 마크다운</button>
             <button class="tab-btn tab-2" onclick="switchTool(2)">📊 엑셀 → 마크다운</button>
             <button class="tab-btn tab-3" onclick="switchTool(3)">📋 마크다운 → 엑셀</button>
+            <button class="tab-btn tab-4" onclick="switchTool(4)">🧾 텍스트 비교</button>
         </div>
 
         <!-- Tool 1: HTML to Markdown -->
@@ -124,6 +125,43 @@
 
         </div>
 
+        <!-- Tool 4: Text Diff (Placeholder) -->
+        <div class="tool-content tool-4" id="tool-4">
+            <div class="workflow-section">
+                <div class="section-container">
+                    <div class="section-title">원문 텍스트</div>
+                    <div id="textDiffOriginal" class="input-area" contenteditable="true"
+                        placeholder="비교할 원문 텍스트를 붙여넣으세요..."></div>
+                </div>
+                <div class="conversion-arrow">
+                    <button class="arrow-btn" id="textDiffConvertBtn" onclick="convertTextDiff()" disabled>
+                        차이점 비교
+                        <small class="shortcut-hint">(⌘1)</small>
+                    </button>
+                    <div class="action-buttons">
+                        <button class="btn btn-copy"
+                            onclick="copyToClipboard(document.getElementById('textDiffOutput').value)"
+                            id="textDiffCopyBtn" disabled>클립보드에 복사
+                            <small class="shortcut-hint">(⌘2)</small>
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearTextDiffTool()">🗑️ 초기화
+                            <small class="shortcut-hint">(⌘3)</small>
+                        </button>
+                    </div>
+                </div>
+                <div class="section-container">
+                    <div class="section-title">변경된 텍스트</div>
+                    <div id="textDiffChanged" class="input-area" contenteditable="true"
+                        placeholder="비교할 변경된 텍스트를 붙여넣으세요..."></div>
+                </div>
+            </div>
+
+            <div class="section-container" style="margin-top: 15px;">
+                <div class="section-title">비교 결과</div>
+                <textarea id="textDiffOutput" readonly placeholder="차이점 결과가 여기에 표시됩니다... (placeholder)"></textarea>
+            </div>
+        </div>
+
 
         <div id="status" class="status"></div>
     </div>
@@ -133,6 +171,7 @@
     <script src="js/html-to-markdown.js"></script>
     <script src="js/excel-to-markdown.js"></script>
     <script src="js/markdown-to-excel.js"></script>
+    <script src="js/text-diff.js"></script>
 </body>
 
 </html>

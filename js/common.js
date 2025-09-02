@@ -130,7 +130,7 @@ const isMac = navigator.userAgent.indexOf('Mac') !== -1;
 const modifierKey = isMac ? 'metaKey' : 'ctrlKey';
 
 // 페이지 로드 시 단축키 표시 업데이트
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     updateShortcutHints();
 });
 
@@ -143,19 +143,19 @@ function updateShortcutHints() {
 }
 
 // --- 키보드 단축키 ---
-document.addEventListener('keydown', function(e) {
+document.addEventListener('keydown', function (e) {
     // Cmd/Ctrl+1: 현재 도구의 변환 실행
     if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '1') {
         e.preventDefault();
         executeCurrentToolConversion();
     }
-    
+
     // Cmd/Ctrl+2: 현재 도구의 결과를 클립보드에 복사
     if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '2') {
         e.preventDefault();
         copyCurrentOutput();
     }
-    
+
     // Cmd/Ctrl+3: 현재 도구 초기화
     if ((isMac ? e.metaKey : e.ctrlKey) && e.key === '3') {
         e.preventDefault();
@@ -165,7 +165,7 @@ document.addEventListener('keydown', function(e) {
 
 // 현재 활성화된 도구의 변환 기능 실행
 function executeCurrentToolConversion() {
-    switch(currentTool) {
+    switch (currentTool) {
         case 1:
             if (typeof convertHtmlToMarkdown === 'function') {
                 convertHtmlToMarkdown();
@@ -182,8 +182,8 @@ function executeCurrentToolConversion() {
             }
             break;
         case 4:
-            if (typeof convertPptToMarkdown === 'function') {
-                convertPptToMarkdown();
+            if (typeof convertTextDiff === 'function') {
+                convertTextDiff();
             }
             break;
         default:
@@ -195,8 +195,8 @@ function executeCurrentToolConversion() {
 function copyCurrentOutput() {
     let outputElement;
     let toolName;
-    
-    switch(currentTool) {
+
+    switch (currentTool) {
         case 1:
             outputElement = document.getElementById('htmlMarkdownOutput');
             toolName = 'HTML → Markdown';
@@ -210,14 +210,14 @@ function copyCurrentOutput() {
             toolName = 'Markdown → Excel';
             break;
         case 4:
-            outputElement = document.getElementById('pptMarkdownOutput');
-            toolName = 'PPT → Markdown';
+            outputElement = document.getElementById('textDiffOutput');
+            toolName = '텍스트 비교';
             break;
         default:
             showStatus('현재 도구를 찾을 수 없습니다.', 'error');
             return;
     }
-    
+
     if (outputElement && outputElement.value) {
         copyToClipboard(outputElement.value);
         showStatus(`📋 ${toolName} 결과가 클립보드에 복사되었습니다!`, 'success');
@@ -228,7 +228,7 @@ function copyCurrentOutput() {
 
 // 현재 도구 초기화
 function clearCurrentTool() {
-    switch(currentTool) {
+    switch (currentTool) {
         case 1:
             if (typeof clearHtmlTool === 'function') {
                 clearHtmlTool();
@@ -245,8 +245,8 @@ function clearCurrentTool() {
             }
             break;
         case 4:
-            if (typeof clearPptTool === 'function') {
-                clearPptTool();
+            if (typeof clearTextDiffTool === 'function') {
+                clearTextDiffTool();
             }
             break;
         default:

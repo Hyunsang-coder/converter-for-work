@@ -22,6 +22,11 @@ python -m http.server 8000
 # Then access at http://localhost:8000
 ```
 
+### Development Workflow
+- No build system required - direct file editing
+- Test changes by refreshing browser
+- All code is vanilla JavaScript ES6+ with DOM APIs
+
 ### File Structure
 - `index.html` - Main application entry point
 - `styles.css` - All CSS styling with CSS custom properties
@@ -44,11 +49,12 @@ python -m http.server 8000
 ### JavaScript Module Structure
 - `common.js` loads first, provides shared functions:
   - `switchTool()` - Tab navigation
-  - `showStatus()` - User feedback system
-  - `copyToClipboard()` - Clipboard operations
-  - `createHtmlTable()` - HTML table generation
-  - `convertToSafeTSV()` - TSV formatting with Excel compatibility
-  - `cleanCellContent()` - HTML content sanitization
+  - `showStatus()` - User feedback system with auto-dismissing messages
+  - `copyToClipboard()` - Cross-browser clipboard operations using execCommand
+  - `createHtmlTable()` - HTML table generation with optional header support
+  - `convertToSafeTSV()` - TSV formatting with Excel compatibility (handles quotes, newlines)
+  - `cleanCellContent()` - HTML content sanitization using temporary DOM elements
+  - Cross-platform keyboard shortcuts (Cmd/Ctrl + 1/2/3) for each tool
 
 ### Data Flow
 1. User inputs content via contentEditable divs, textareas, or file upload
@@ -64,6 +70,28 @@ python -m http.server 8000
 
 ## Korean Language Support
 The application is designed for Korean PUBG translators with Korean UI text. All user-facing messages, placeholders, and button labels are in Korean.
+
+## Implementation Details
+
+### HTML to Markdown Conversion
+- Uses recursive DOM node processing with `domToMarkdown()` function
+- Handles nested structures (lists, tables, formatting) through tree traversal
+- Converts HTML elements to corresponding Markdown syntax with proper spacing
+
+### Excel Data Processing
+- Parses pasted Excel data using clipboard HTML format detection
+- Converts tabular data to 2D arrays for processing
+- Generates Markdown tables with configurable header options
+
+### Markdown to Excel Export
+- Parses Markdown table syntax using regex patterns
+- Converts to TSV format with proper escaping for Excel compatibility
+- Provides HTML preview of final table structure
+
+### Cross-Platform Considerations
+- Keyboard shortcuts work on both Mac (Cmd) and Windows/Linux (Ctrl)
+- Clipboard operations use fallback methods for broader browser support
+- CSS uses system fonts for native appearance on each platform
 
 ## File Dependencies
 PowerPoint conversion requires `pptxtojson.min.js` to load before `ppt-to-markdown.js`. All other modules can load in any order after `common.js`.
