@@ -361,6 +361,103 @@ textarea:focus {
     color: white;
 }
 
+/* === Text Diff styles === */
+.diff-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.diff-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.diff-result {
+    border: 2px solid #e0e7ff;
+    border-radius: 10px;
+    padding: 0;
+    background: white;
+    overflow: auto;
+}
+
+.diff-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.diff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.diff-col {
+    border-right: 1px solid #e5e7eb;
+}
+
+.diff-col:last-child {
+    border-right: none;
+}
+
+.diff-line {
+    font-family: 'Menlo', 'Monaco', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 6px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    white-space: pre-wrap;
+}
+
+.diff-line.equal {
+    background: #ffffff;
+}
+
+.diff-line.added {
+    background: #ecfdf5;
+}
+
+.diff-line.deleted {
+    background: #fef2f2;
+}
+
+.diff-line.modified {
+    background: #eff6ff;
+}
+
+.token-added {
+    background: #bbf7d0;
+    color: #065f46;
+    border-radius: 4px;
+    padding: 0 2px;
+}
+
+.token-deleted {
+    background: #fecaca;
+    color: #7f1d1d;
+    border-radius: 4px;
+    padding: 0 2px;
+    text-decoration: line-through;
+}
+
+.diff-unified .diff-line {
+    display: flex;
+    gap: 10px;
+}
+
+.diff-unified .gutter {
+    width: 40px;
+    text-align: right;
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+
 /* 단축키 힌트 스타일 */
 .shortcut-hint {
     display: block;

@@ -182,8 +182,8 @@ function executeCurrentToolConversion() {
             }
             break;
         case 4:
-            if (typeof convertTextDiff === 'function') {
-                convertTextDiff();
+            if (typeof renderTextDiff === 'function') {
+                renderTextDiff();
             }
             break;
         default:
@@ -210,9 +210,8 @@ function copyCurrentOutput() {
             toolName = 'Markdown → Excel';
             break;
         case 4:
-            outputElement = document.getElementById('textDiffOutput');
-            toolName = '텍스트 비교';
-            break;
+            showStatus('텍스트 비교 도구에는 복사 기능이 없습니다.', 'error');
+            return;
         default:
             showStatus('현재 도구를 찾을 수 없습니다.', 'error');
             return;

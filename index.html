@@ -125,8 +125,15 @@
 
         </div>
 
-        <!-- Tool 4: Text Diff (Placeholder) -->
+        <!-- Tool 4: Text Diff -->
         <div class="tool-content tool-4" id="tool-4">
+            <div class="section-container" style="margin-bottom: 15px;">
+                <div class="diff-stats" id="textDiffStats"></div>
+                <div id="textDiffResult" class="diff-result">
+                    <div class="empty-state">양쪽 텍스트를 입력하면 차이점이 표시됩니다.</div>
+                </div>
+            </div>
+
             <div class="workflow-section">
                 <div class="section-container">
                     <div class="section-title">원문 텍스트</div>
@@ -134,19 +141,10 @@
                         placeholder="비교할 원문 텍스트를 붙여넣으세요..."></div>
                 </div>
                 <div class="conversion-arrow">
-                    <button class="arrow-btn" id="textDiffConvertBtn" onclick="convertTextDiff()" disabled>
-                        차이점 비교
-                        <small class="shortcut-hint">(⌘1)</small>
-                    </button>
+                    <button class="arrow-btn" id="textDiffViewToggle" onclick="toggleTextDiffView()">Side by
+                        Side</button>
                     <div class="action-buttons">
-                        <button class="btn btn-copy"
-                            onclick="copyToClipboard(document.getElementById('textDiffOutput').value)"
-                            id="textDiffCopyBtn" disabled>클립보드에 복사
-                            <small class="shortcut-hint">(⌘2)</small>
-                        </button>
-                        <button class="btn btn-secondary" onclick="clearTextDiffTool()">🗑️ 초기화
-                            <small class="shortcut-hint">(⌘3)</small>
-                        </button>
+                        <button class="btn btn-secondary" onclick="clearTextDiffTool()">🗑️ 초기화</button>
                     </div>
                 </div>
                 <div class="section-container">
@@ -154,11 +152,6 @@
                     <div id="textDiffChanged" class="input-area" contenteditable="true"
                         placeholder="비교할 변경된 텍스트를 붙여넣으세요..."></div>
                 </div>
-            </div>
-
-            <div class="section-container" style="margin-top: 15px;">
-                <div class="section-title">비교 결과</div>
-                <textarea id="textDiffOutput" readonly placeholder="차이점 결과가 여기에 표시됩니다... (placeholder)"></textarea>
             </div>
         </div>
 
