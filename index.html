@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PUBG Translator Tools - HTML/Excel/Markdown Converter</title>
+    <title>PUBG Translator Tools - HTML/마크다운/엑셀 변환 + 텍스트 비교</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -12,149 +12,155 @@
     <div class="container">
         <div class="header">
             <h1><img src="asset/icon/pubg_logo.png" alt="PUBG" class="emoji-icon"> PUBG Translator Tools</h1>
-            <p>HTML, Excel, Markdown Converter <span class="author">by Hyunsang Joo</span></p>
+            <p>HTML/마크다운/엑셀 변환 + 텍스트 비교 <span class="author">by Hyunsang Joo</span></p>
         </div>
-        <div class="tab-navigation">
-            <button class="tab-btn tab-1 active" onclick="switchTool(1)">🌐 웹페이지 → 마크다운</button>
-            <button class="tab-btn tab-2" onclick="switchTool(2)">📊 엑셀 → 마크다운</button>
-            <button class="tab-btn tab-3" onclick="switchTool(3)">📋 마크다운 → 엑셀</button>
-            <button class="tab-btn tab-4" onclick="switchTool(4)">🧾 텍스트 비교</button>
-        </div>
+        <div class="app-layout">
+            <aside class="sidebar">
+                <button class="tab-btn tab-1 active" onclick="switchTool(1)">🌐 웹페이지 → 마크다운</button>
+                <button class="tab-btn tab-2" onclick="switchTool(2)">📊 엑셀 → 마크다운</button>
+                <button class="tab-btn tab-3" onclick="switchTool(3)">📋 마크다운 → 엑셀</button>
+                <button class="tab-btn tab-4" onclick="switchTool(4)">🧾 텍스트 비교</button>
+            </aside>
+            <div class="main-content">
 
-        <!-- Tool 1: HTML to Markdown -->
-        <div class="tool-content tool-1 active" id="tool-1">
-            <div class="workflow-section">
-                <div class="section-container">
-                    <div class="section-title">웹페이지 내용 붙여넣기 (Ctrl+V)</div>
-                    <div id="htmlInput" class="input-area" contenteditable="true"
-                        placeholder="이곳에 웹페이지의 전체 또는 일부를 복사하여 붙여넣으세요..."></div>
+                <!-- Tool 1: HTML to Markdown -->
+                <div class="tool-content tool-1 active" id="tool-1">
+                    <div class="workflow-section">
+                        <div class="section-container">
+                            <div class="section-title">웹페이지 내용 붙여넣기 (Ctrl+V)</div>
+                            <div id="htmlInput" class="input-area" contenteditable="true"
+                                placeholder="이곳에 웹페이지의 전체 또는 일부를 복사하여 붙여넣으세요..."></div>
+                        </div>
+                        <div class="conversion-arrow">
+                            <button class="arrow-btn" id="htmlConvertBtn" onclick="convertHtmlToMarkdown()" disabled>
+                                마크다운 변환
+                                <small class="shortcut-hint">(⌘1)</small>
+                            </button>
+                            <div class="action-buttons">
+                                <button class="btn btn-copy"
+                                    onclick="copyToClipboard(document.getElementById('htmlMarkdownOutput').value)"
+                                    id="htmlCopyBtn" disabled>클립보드에 복사
+                                    <small class="shortcut-hint">(⌘2)</small>
+                                </button>
+                                <button class="btn btn-secondary" onclick="clearHtmlTool()">🗑️ 초기화
+                                    <small class="shortcut-hint">(⌘3)</small>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="section-container">
+                            <div class="section-title">마크다운 결과</div>
+                            <textarea id="htmlMarkdownOutput" readonly placeholder="변환된 마크다운이 여기에 표시됩니다..."></textarea>
+                        </div>
+                    </div>
+
                 </div>
-                <div class="conversion-arrow">
-                    <button class="arrow-btn" id="htmlConvertBtn" onclick="convertHtmlToMarkdown()" disabled>
-                        마크다운 변환
-                        <small class="shortcut-hint">(⌘1)</small>
-                    </button>
-                    <div class="action-buttons">
-                        <button class="btn btn-copy"
-                            onclick="copyToClipboard(document.getElementById('htmlMarkdownOutput').value)"
-                            id="htmlCopyBtn" disabled>클립보드에 복사
-                            <small class="shortcut-hint">(⌘2)</small>
-                        </button>
-                        <button class="btn btn-secondary" onclick="clearHtmlTool()">🗑️ 초기화
-                            <small class="shortcut-hint">(⌘3)</small>
-                        </button>
+
+                <!-- Tool 2: Excel to Markdown -->
+                <div class="tool-content tool-2" id="tool-2">
+                    <div class="workflow-section">
+                        <div class="section-container">
+                            <div class="section-title">엑셀 테이블 붙여넣기 (Ctrl+V)</div>
+                            <div id="excelInput" class="input-area" contenteditable="true"
+                                placeholder="이곳에 엑셀 시트의 셀들을 복사하여 붙여넣으세요..."></div>
+                        </div>
+                        <div class="conversion-arrow">
+                            <button class="arrow-btn" id="excelConvertBtn" onclick="convertExcelToMarkdown()" disabled>
+                                마크다운 변환
+                                <small class="shortcut-hint">(⌘1)</small>
+                            </button>
+
+                            <div class="action-buttons">
+                                <button class="btn btn-copy"
+                                    onclick="copyToClipboard(document.getElementById('excelMarkdownOutput').value)"
+                                    id="excelCopyBtn" disabled>클립보드에 복사
+                                    <small class="shortcut-hint">(⌘2)</small>
+                                </button>
+                                <button class="btn btn-secondary" onclick="clearExcelTool()">🗑️ 초기화
+                                    <small class="shortcut-hint">(⌘3)</small>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="section-container">
+                            <div class="section-title">마크다운 테이블 결과
+                                <label style="font-weight:normal; font-size:0.95em; margin-left:12px;">
+                                    <input type="checkbox" id="useFirstRowAsHeader" checked
+                                        style="vertical-align:middle; margin-right:4px;">
+                                    첫 행 헤더 설정
+                                </label>
+                            </div>
+                            <textarea id="excelMarkdownOutput" readonly
+                                placeholder="변환된 마크다운 테이블이 여기에 표시됩니다..."></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tool 3: Markdown to Excel -->
+                <div class="tool-content tool-3" id="tool-3">
+                    <div class="workflow-section">
+                        <div class="section-container">
+                            <div class="section-title">마크다운 테이블 입력</div>
+                            <textarea id="markdownInput" placeholder="마크다운 테이블을 여기에 붙여넣으세요..."></textarea>
+                        </div>
+                        <div class="conversion-arrow">
+                            <button class="arrow-btn" id="markdownConvertBtn" onclick="convertMarkdownToExcel()"
+                                disabled>
+                                엑셀 변환
+                                <small class="shortcut-hint">(⌘1)</small>
+                            </button>
+                            <div class="action-buttons">
+                                <button class="btn btn-copy" onclick="copyToClipboard(markdownTsvData)"
+                                    id="markdownCopyBtn" disabled>
+                                    클립보드에 복사
+                                    <small class="shortcut-hint">(⌘2)</small>
+                                </button>
+                                <button class="btn btn-secondary" onclick="clearMarkdownTool()">🗑️ 초기화
+                                    <small class="shortcut-hint">(⌘3)</small>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="section-container">
+                            <div class="section-title">테이블 미리보기 (엑셀 출력 형태)</div>
+                            <div class="table-preview output" id="markdownTablePreview">
+                                <div class="empty-state">변환된 테이블이 여기에 표시됩니다.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Tool 4: Text Diff -->
+                <div class="tool-content tool-4" id="tool-4">
+                    <div class="section-container" style="margin-bottom: 15px;">
+                        <div class="diff-stats" id="textDiffStats"></div>
+                        <div id="textDiffResult" class="diff-result">
+                            <div class="empty-state">양쪽 텍스트를 입력하면 차이점이 표시됩니다.</div>
+                        </div>
+                    </div>
+
+                    <div class="workflow-section">
+                        <div class="section-container">
+                            <div class="section-title">원문 텍스트</div>
+                            <div id="textDiffOriginal" class="input-area" contenteditable="true"
+                                placeholder="비교할 원문 텍스트를 붙여넣으세요..."></div>
+                        </div>
+                        <div class="conversion-arrow">
+                            <button class="arrow-btn" id="textDiffViewToggle" onclick="toggleTextDiffView()">Side by
+                                Side</button>
+                            <div class="action-buttons">
+                                <button class="btn btn-secondary" onclick="clearTextDiffTool()">🗑️ 초기화</button>
+                            </div>
+                        </div>
+                        <div class="section-container">
+                            <div class="section-title">변경된 텍스트</div>
+                            <div id="textDiffChanged" class="input-area" contenteditable="true"
+                                placeholder="비교할 변경된 텍스트를 붙여넣으세요..."></div>
+                        </div>
                     </div>
                 </div>
-                <div class="section-container">
-                    <div class="section-title">마크다운 결과</div>
-                    <textarea id="htmlMarkdownOutput" readonly placeholder="변환된 마크다운이 여기에 표시됩니다..."></textarea>
-                </div>
+
             </div>
-
         </div>
-
-        <!-- Tool 2: Excel to Markdown -->
-        <div class="tool-content tool-2" id="tool-2">
-            <div class="workflow-section">
-                <div class="section-container">
-                    <div class="section-title">엑셀 테이블 붙여넣기 (Ctrl+V)</div>
-                    <div id="excelInput" class="input-area" contenteditable="true"
-                        placeholder="이곳에 엑셀 시트의 셀들을 복사하여 붙여넣으세요..."></div>
-                </div>
-                <div class="conversion-arrow">
-                    <button class="arrow-btn" id="excelConvertBtn" onclick="convertExcelToMarkdown()" disabled>
-                        마크다운 변환
-                        <small class="shortcut-hint">(⌘1)</small>
-                    </button>
-
-                    <div class="action-buttons">
-                        <button class="btn btn-copy"
-                            onclick="copyToClipboard(document.getElementById('excelMarkdownOutput').value)"
-                            id="excelCopyBtn" disabled>클립보드에 복사
-                            <small class="shortcut-hint">(⌘2)</small>
-                        </button>
-                        <button class="btn btn-secondary" onclick="clearExcelTool()">🗑️ 초기화
-                            <small class="shortcut-hint">(⌘3)</small>
-                        </button>
-                    </div>
-                </div>
-                <div class="section-container">
-                    <div class="section-title">마크다운 테이블 결과
-                        <label style="font-weight:normal; font-size:0.95em; margin-left:12px;">
-                            <input type="checkbox" id="useFirstRowAsHeader" checked
-                                style="vertical-align:middle; margin-right:4px;">
-                            첫 행 헤더 설정
-                        </label>
-                    </div>
-                    <textarea id="excelMarkdownOutput" readonly placeholder="변환된 마크다운 테이블이 여기에 표시됩니다..."></textarea>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Tool 3: Markdown to Excel -->
-        <div class="tool-content tool-3" id="tool-3">
-            <div class="workflow-section">
-                <div class="section-container">
-                    <div class="section-title">마크다운 테이블 입력</div>
-                    <textarea id="markdownInput" placeholder="마크다운 테이블을 여기에 붙여넣으세요..."></textarea>
-                </div>
-                <div class="conversion-arrow">
-                    <button class="arrow-btn" id="markdownConvertBtn" onclick="convertMarkdownToExcel()" disabled>
-                        엑셀 변환
-                        <small class="shortcut-hint">(⌘1)</small>
-                    </button>
-                    <div class="action-buttons">
-                        <button class="btn btn-copy" onclick="copyToClipboard(markdownTsvData)" id="markdownCopyBtn"
-                            disabled>
-                            클립보드에 복사
-                            <small class="shortcut-hint">(⌘2)</small>
-                        </button>
-                        <button class="btn btn-secondary" onclick="clearMarkdownTool()">🗑️ 초기화
-                            <small class="shortcut-hint">(⌘3)</small>
-                        </button>
-                    </div>
-                </div>
-                <div class="section-container">
-                    <div class="section-title">테이블 미리보기 (엑셀 출력 형태)</div>
-                    <div class="table-preview output" id="markdownTablePreview">
-                        <div class="empty-state">변환된 테이블이 여기에 표시됩니다.</div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Tool 4: Text Diff -->
-        <div class="tool-content tool-4" id="tool-4">
-            <div class="section-container" style="margin-bottom: 15px;">
-                <div class="diff-stats" id="textDiffStats"></div>
-                <div id="textDiffResult" class="diff-result">
-                    <div class="empty-state">양쪽 텍스트를 입력하면 차이점이 표시됩니다.</div>
-                </div>
-            </div>
-
-            <div class="workflow-section">
-                <div class="section-container">
-                    <div class="section-title">원문 텍스트</div>
-                    <div id="textDiffOriginal" class="input-area" contenteditable="true"
-                        placeholder="비교할 원문 텍스트를 붙여넣으세요..."></div>
-                </div>
-                <div class="conversion-arrow">
-                    <button class="arrow-btn" id="textDiffViewToggle" onclick="toggleTextDiffView()">Side by
-                        Side</button>
-                    <div class="action-buttons">
-                        <button class="btn btn-secondary" onclick="clearTextDiffTool()">🗑️ 초기화</button>
-                    </div>
-                </div>
-                <div class="section-container">
-                    <div class="section-title">변경된 텍스트</div>
-                    <div id="textDiffChanged" class="input-area" contenteditable="true"
-                        placeholder="비교할 변경된 텍스트를 붙여넣으세요..."></div>
-                </div>
-            </div>
-        </div>
-
 
         <div id="status" class="status"></div>
     </div>

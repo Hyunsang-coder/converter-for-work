@@ -24,10 +24,10 @@ body {
 
 .container {
     width: 100%;
-    max-width: 1600px;
+    max-width: none;
     height: 100vh;
     min-height: 0;
-    margin: 0 auto;
+    margin: 0;
     background: var(--white);
     display: flex;
     flex-direction: column;
@@ -64,16 +64,39 @@ body {
     opacity: 0.8;
 }
 
-.tab-navigation {
+/* Sidebar layout */
+.app-layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.sidebar {
     background: var(--light-gray);
-    border-bottom: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+}
+
+/* compact sidebar buttons */
+.sidebar .tab-btn {
+    flex: 0 0 auto;
+    padding: 10px 14px;
+    font-size: 14px;
+    border-radius: 8px;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
 }
 
 .tab-btn {
     flex: 1;
-    max-width: 350px;
+    max-width: none;
     padding: 18px 25px;
     border: none;
     background: transparent;
@@ -91,7 +114,7 @@ body {
 
 .tab-btn.active {
     background: var(--white);
-    border-bottom-color: var(--primary-color);
+    border-left: 3px solid var(--primary-color);
     color: var(--primary-color);
 }
 
@@ -203,7 +226,7 @@ body {
 .input-area {
     width: 100%;
     flex: 1 1 0;
-    height: auto;
+    height: 220px;
     max-height: none;
     min-height: 0;
     border: 2px solid #e0e7ff;
@@ -379,6 +402,7 @@ textarea:focus {
     padding: 0;
     background: white;
     overflow: auto;
+    max-height: 60vh;
 }
 
 .diff-stats {

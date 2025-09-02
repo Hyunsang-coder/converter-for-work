@@ -8,7 +8,8 @@ function switchTool(toolNumber) {
     document.querySelectorAll('.tool-content').forEach(tool => tool.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(tab => tab.classList.remove('active'));
     document.getElementById(`tool-${toolNumber}`).classList.add('active');
-    document.querySelector(`.tab-btn.tab-${toolNumber}`).classList.add('active');
+    const activeTab = document.querySelector(`.tab-btn.tab-${toolNumber}`);
+    if (activeTab) activeTab.classList.add('active');
     currentTool = toolNumber;
     clearStatus();
 }
