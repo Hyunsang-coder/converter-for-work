@@ -88,6 +88,11 @@ body {
     font-size: 14px;
     border-radius: 8px;
     text-align: left;
+    /* Override global button centering for sidebar menu */
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .main-content {

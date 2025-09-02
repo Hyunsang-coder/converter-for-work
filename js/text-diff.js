@@ -5,7 +5,8 @@ let textDiffViewMode = 'side-by-side'; // 'side-by-side' | 'unified'
 function toggleTextDiffView() {
     textDiffViewMode = textDiffViewMode === 'side-by-side' ? 'unified' : 'side-by-side';
     const toggleBtn = document.getElementById('textDiffViewToggle');
-    if (toggleBtn) toggleBtn.textContent = textDiffViewMode === 'side-by-side' ? 'Side by Side' : 'Unified View';
+    // Button label shows the opposite of current mode (action to switch to)
+    if (toggleBtn) toggleBtn.textContent = textDiffViewMode === 'side-by-side' ? 'Unified View' : 'Side by Side';
     renderTextDiff();
 }
 
@@ -19,6 +20,9 @@ function enableTextDiffButtons() {
 
     original?.addEventListener('input', updateState);
     changed?.addEventListener('input', updateState);
+    // Initialize toggle button label correctly on load
+    const toggleBtn = document.getElementById('textDiffViewToggle');
+    if (toggleBtn) toggleBtn.textContent = textDiffViewMode === 'side-by-side' ? 'Unified View' : 'Side by Side';
     updateState();
 }
 
