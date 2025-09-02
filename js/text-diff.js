@@ -1,4 +1,4 @@
-// Text Diff with side-by-side and unified rendering
+// js/text-diff.js
 
 let textDiffViewMode = 'side-by-side'; // 'side-by-side' | 'unified'
 
@@ -25,151 +25,131 @@ function enableTextDiffButtons() {
 document.addEventListener('DOMContentLoaded', enableTextDiffButtons);
 
 function getTextInputs() {
-    const original = (document.getElementById('textDiffOriginal')?.innerText || '').replace(/\r/g, '');
-    const changed = (document.getElementById('textDiffChanged')?.innerText || '').replace(/\r/g, '');
+    const originalEl = document.getElementById('textDiffOriginal');
+    const changedEl = document.getElementById('textDiffChanged');
+    const original = (originalEl?.value || '').replace(/\r/g, '');
+    const changed = (changedEl?.value || '').replace(/\r/g, '');
     return { original, changed };
-}
-
-function splitLines(text) {
-    return text.split(/\n/);
-}
-
-function computeWordDiff(lineA, lineB) {
-    const tokenize = (text) => {
-        const tokens = [];
-        const regex = /(\S+|\s+)/g;
-        let match;
-        while ((match = regex.exec(text)) !== null) tokens.push(match[0]);
-        return tokens;
-    };
-
-    const a = tokenize(lineA || '');
-    const b = tokenize(lineB || '');
-    const n = a.length, m = b.length;
-    const dp = Array(n + 1).fill(null).map(() => Array(m + 1).fill(0));
-    for (let i = 1; i <= n; i++) {
-        for (let j = 1; j <= m; j++) {
-            dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] + 1 : Math.max(dp[i - 1][j], dp[i][j - 1]);
-        }
-    }
-    const left = []; const right = [];
-    let i = n, j = m;
-    while (i > 0 || j > 0) {
-        if (i > 0 && j > 0 && a[i - 1] === b[j - 1]) {
-            left.unshift({ type: 'equal', text: a[i - 1] });
-            right.unshift({ type: 'equal', text: b[j - 1] });
-            i--; j--;
-        } else if (i > 0 && (j === 0 || dp[i - 1][j] >= dp[i][j - 1])) {
-            left.unshift({ type: 'deleted', text: a[i - 1] });
-            i--;
-        } else if (j > 0) {
-            right.unshift({ type: 'added', text: b[j - 1] });
-            j--;
-        }
-    }
-    return { left, right };
-}
-
-function computeTextDiff(textA, textB) {
-    const linesA = splitLines(textA);
-    const linesB = splitLines(textB);
-    const result = [];
-    let leftLineNum = 1;
-    let rightLineNum = 1;
-    const maxLines = Math.max(linesA.length, linesB.length);
-    for (let i = 0; i < maxLines; i++) {
-        const la = linesA[i];
-        const lb = linesB[i];
-        if (la === undefined && lb !== undefined) {
-            result.push({ type: 'added', leftLineNum: null, rightLineNum: rightLineNum++, leftContent: '', rightContent: lb, leftTokens: [], rightTokens: [{ type: 'added', text: lb }] });
-        } else if (la !== undefined && lb === undefined) {
-            result.push({ type: 'deleted', leftLineNum: leftLineNum++, rightLineNum: null, leftContent: la, rightContent: '', leftTokens: [{ type: 'deleted', text: la }], rightTokens: [] });
-        } else if (la === lb) {
-            result.push({ type: 'equal', leftLineNum: leftLineNum++, rightLineNum: rightLineNum++, leftContent: la, rightContent: lb, leftTokens: [{ type: 'equal', text: la }], rightTokens: [{ type: 'equal', text: lb }] });
-        } else {
-            const { left, right } = computeWordDiff(la || '', lb || '');
-            result.push({ type: 'modified', leftLineNum: leftLineNum++, rightLineNum: rightLineNum++, leftContent: la, rightContent: lb, leftTokens: left, rightTokens: right });
-        }
-    }
-    return result;
-}
-
-function renderToken(token) {
-    if (token.type === 'deleted') return `<span class="token-deleted">${escapeHtml(token.text)}</span>`;
-    if (token.type === 'added') return `<span class="token-added">${escapeHtml(token.text)}</span>`;
-    return `<span>${escapeHtml(token.text)}</span>`;
-}
-
-function escapeHtml(s) {
-    return (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-
-function computeStats(diff) {
-    let additions = 0, removals = 0, totalLeftLines = 0, totalRightLines = 0;
-    diff.forEach(line => {
-        if (line.leftLineNum) totalLeftLines++;
-        if (line.rightLineNum) totalRightLines++;
-        if (line.type === 'added') additions++;
-        else if (line.type === 'deleted') removals++;
-        else if (line.type === 'modified') {
-            const addedWords = line.rightTokens.filter(t => t.type === 'added').length;
-            const deletedWords = line.leftTokens.filter(t => t.type === 'deleted').length;
-            if (addedWords > 0) additions++;
-            if (deletedWords > 0) removals++;
-        }
-    });
-    return { additions, removals, totalLeftLines, totalRightLines };
 }
 
 function renderTextDiff() {
     const { original, changed } = getTextInputs();
-    const container = document.getElementById('textDiffResult');
-    const statsEl = document.getElementById('textDiffStats');
-    if (!container) return;
+    const diffResult = document.getElementById('textDiffResult');
+    const diffStats = document.getElementById('textDiffStats');
 
     if (!original && !changed) {
-        container.innerHTML = '<div class="empty-state">양쪽 텍스트를 입력하면 차이점이 표시됩니다.</div>';
-        if (statsEl) statsEl.textContent = '';
+        clearTextDiffTool();
         return;
     }
 
-    const diff = computeTextDiff(original, changed);
-    const stats = computeStats(diff);
-    if (statsEl) {
-        statsEl.innerHTML = `<div>삭제: <strong style="color:#dc2626">${stats.removals}</strong></div><div>추가: <strong style="color:#16a34a">${stats.additions}</strong></div><div>Left: ${stats.totalLeftLines} lines</div><div>Right: ${stats.totalRightLines} lines</div>`;
-    }
+    const unifiedDiff = Diff.diffArrays(original.split('\n'), changed.split('\n'));
+    
+    let html = '';
+    let added = 0;
+    let removed = 0;
+    let i = 0, j = 0;
 
     if (textDiffViewMode === 'side-by-side') {
-        const leftCol = diff.map((line, idx) => {
-            const content = (line.leftTokens && line.leftTokens.length > 0)
-                ? line.leftTokens.map(renderToken).join('')
-                : escapeHtml(line.leftContent || '\u00A0');
-            return `<div class="diff-line ${line.type}"><span class="gutter">${line.leftLineNum || ''}</span>${content}</div>`;
-        }).join('');
+        html = '<div class="diff-grid">';
+        unifiedDiff.forEach(part => {
+            if (part.added) {
+                part.value.forEach(line => {
+                    html += `
+                        <div class="diff-line diff-line-added">
+                            <div class="gutter"></div> <div class="content"></div>
+                        </div>
+                        <div class="diff-line diff-line-added">
+                            <div class="gutter">${j + 1}</div> <div class="content"><span class="token-added">${escapeHtml(line)}</span></div>
+                        </div>
+                    `;
+                    j++;
+                    added++;
+                });
+            } else if (part.removed) {
+                part.value.forEach(line => {
+                    html += `
+                        <div class="diff-line diff-line-deleted">
+                            <div class="gutter">${i + 1}</div> <div class="content"><span class="token-deleted">${escapeHtml(line)}</span></div>
+                        </div>
+                        <div class="diff-line diff-line-deleted">
+                            <div class="gutter"></div> <div class="content"></div>
+                        </div>
+                    `;
+                    i++;
+                    removed++;
+                });
+            } else {
+                part.value.forEach(line => {
+                    const originalLine = original.split('\n')[i];
+                    const changedLine = changed.split('\n')[j];
+                    let originalContent = escapeHtml(originalLine);
+                    let changedContent = escapeHtml(changedLine);
+                    let lineClass = '';
 
-        const rightCol = diff.map((line, idx) => {
-            const content = (line.rightTokens && line.rightTokens.length > 0)
-                ? line.rightTokens.map(renderToken).join('')
-                : escapeHtml(line.rightContent || '\u00A0');
-            return `<div class="diff-line ${line.type}"><span class="gutter">${line.rightLineNum || ''}</span>${content}</div>`;
-        }).join('');
+                    if (originalLine !== changedLine) {
+                        lineClass = 'diff-line-modified';
+                        const wordDiff = Diff.diffWords(originalLine, changedLine);
+                        originalContent = '';
+                        changedContent = '';
+                        wordDiff.forEach(word => {
+                            if (word.added) {
+                                changedContent += `<span class="token-added">${escapeHtml(word.value)}</span>`;
+                            } else if (word.removed) {
+                                originalContent += `<span class="token-deleted">${escapeHtml(word.value)}</span>`;
+                            } else {
+                                originalContent += escapeHtml(word.value);
+                                changedContent += escapeHtml(word.value);
+                            }
+                        });
+                        added++; 
+                        removed++;
+                    }
 
-        container.classList.remove('diff-unified');
-        container.innerHTML = `<div class="diff-grid"><div class="diff-col">${leftCol}</div><div class="diff-col">${rightCol}</div></div>`;
-    } else {
-        const unified = diff.map(line => {
-            const leftNum = line.leftLineNum || '';
-            const rightNum = line.rightLineNum || '';
-            let content;
-            if (line.type === 'added') content = line.rightTokens.map(renderToken).join('');
-            else if (line.type === 'deleted') content = line.leftTokens.map(renderToken).join('');
-            else if (line.type === 'equal') content = escapeHtml(line.leftContent || '');
-            else content = `${line.leftTokens.map(renderToken).join('')}\n${line.rightTokens.map(renderToken).join('')}`;
-            return `<div class="diff-line ${line.type}"><span class="gutter">${leftNum}</span><span class="gutter">${rightNum}</span><div>${content}</div></div>`;
-        }).join('');
-        container.classList.add('diff-unified');
-        container.innerHTML = unified;
+                    html += `
+                        <div class="diff-line ${lineClass}">
+                            <div class="gutter">${i + 1}</div> <div class="content">${originalContent}</div>
+                        </div>
+                        <div class="diff-line ${lineClass}">
+                            <div class="gutter">${j + 1}</div> <div class="content">${changedContent}</div>
+                        </div>
+                    `;
+                    i++;
+                    j++;
+                });
+            }
+        });
+        html += '</div>';
+    } else { // Unified View
+        html = '<div class="diff-unified">';
+        const lineDiff = Diff.diffLines(original, changed);
+        lineDiff.forEach(part => {
+            const lines = part.value.split('\n');
+            lines.forEach((line, index) => {
+                if (index === lines.length - 1 && line === '') return;
+                
+                let sign = part.added ? '+' : part.removed ? '-' : ' ';
+                let lineClass = part.added ? 'diff-line-added' : part.removed ? 'diff-line-deleted' : '';
+                
+                if(part.added) added++;
+                if(part.removed) removed++;
+
+                html += `
+                    <div class="diff-line ${lineClass}">
+                        <div class="gutter">${sign}</div>
+                        <div class="content">${escapeHtml(line)}</div>
+                    </div>
+                `;
+            });
+        });
+        html += '</div>';
     }
+
+    diffResult.innerHTML = html;
+    diffStats.innerHTML = `<strong>${added + removed} changes:</strong> <span class="stats-added">${added} additions</span> & <span class="stats-deleted">${removed} deletions</span>`;
+}
+
+function escapeHtml(s) {
+    return (s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 function clearTextDiffTool() {
@@ -177,9 +157,9 @@ function clearTextDiffTool() {
     const changed = document.getElementById('textDiffChanged');
     const container = document.getElementById('textDiffResult');
     const statsEl = document.getElementById('textDiffStats');
-    if (original) original.innerHTML = '';
-    if (changed) changed.innerHTML = '';
+    if (original) original.value = '';
+    if (changed) changed.value = '';
     if (container) container.innerHTML = '<div class="empty-state">양쪽 텍스트를 입력하면 차이점이 표시됩니다.</div>';
-    if (statsEl) statsEl.textContent = '';
+    if (statsEl) statsEl.innerHTML = '';
     showStatus('텍스트 비교 입력이 초기화되었습니다.', 'success');
 }

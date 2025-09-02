@@ -223,7 +223,7 @@ body {
 }
 
 /* === 입력/출력 영역 (스크롤바로 페이지 확장 방지) === */
-.input-area {
+.input-area, textarea {
     width: 100%;
     flex: 1 1 0;
     height: 220px;

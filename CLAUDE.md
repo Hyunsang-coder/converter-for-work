@@ -8,7 +8,7 @@ A web-based multi-format converter tool for PUBG translation work, providing fou
 1. Web content (HTML) to Markdown
 2. Excel tables to Markdown tables
 3. Markdown tables to Excel format (TSV)
-4. PowerPoint presentations to Markdown
+4. Text comparison with side-by-side and unified diff views
 
 The application is a single-page HTML application with vanilla JavaScript modules, no build system required.
 
@@ -34,17 +34,19 @@ python -m http.server 8000
 - `js/html-to-markdown.js` - HTML to Markdown conversion logic
 - `js/excel-to-markdown.js` - Excel to Markdown table conversion
 - `js/markdown-to-excel.js` - Markdown to Excel (TSV) conversion
-- `js/pptxtojson.min.js` - Third-party PowerPoint parsing library
-- `js/ppt-to-markdown.js` - PowerPoint to Markdown conversion (loads after library)
+- `js/text-diff.js` - Text comparison with word-level diff visualization
+- `js/pptxtojson.min.js` - Third-party PowerPoint parsing library (not currently loaded)
+- `js/ppt-to-markdown.js` - PowerPoint to Markdown conversion (not currently used)
 - `asset/icon/pubg_logo.png` - Application logo
 
 ## Architecture
 
 ### Core Design Patterns
-- **Tab-based UI**: Single page with four conversion tools accessed via tabs
-- **Modular JavaScript**: Each conversion tool is a separate module with shared utilities
-- **Real-time Validation**: Input validation and button state management
+- **Tab-based UI**: Single page with four tools accessed via sidebar navigation
+- **Modular JavaScript**: Each tool is a separate module with shared utilities in `common.js`
+- **Real-time Processing**: Live input validation and immediate diff visualization
 - **Clipboard Integration**: All outputs can be copied to clipboard for easy workflow
+- **Cross-platform Shortcuts**: Keyboard shortcuts work with both Cmd (Mac) and Ctrl (Windows/Linux)
 
 ### JavaScript Module Structure
 - `common.js` loads first, provides shared functions:
@@ -54,12 +56,12 @@ python -m http.server 8000
   - `createHtmlTable()` - HTML table generation with optional header support
   - `convertToSafeTSV()` - TSV formatting with Excel compatibility (handles quotes, newlines)
   - `cleanCellContent()` - HTML content sanitization using temporary DOM elements
-  - Cross-platform keyboard shortcuts (Cmd/Ctrl + 1/2/3) for each tool
+  - Cross-platform keyboard shortcuts (Cmd/Ctrl + 1/2/3) for conversion, copy, and clear operations
 
 ### Data Flow
-1. User inputs content via contentEditable divs, textareas, or file upload
-2. JavaScript modules parse and convert data formats
-3. Results displayed in readonly textareas or HTML table previews
+1. User inputs content via contentEditable divs or textareas with paste handling
+2. JavaScript modules parse and convert data formats in real-time
+3. Results displayed in readonly textareas, HTML table previews, or diff visualization
 4. Copy-to-clipboard functionality for seamless workflow integration
 
 ### UI State Management
@@ -88,10 +90,19 @@ The application is designed for Korean PUBG translators with Korean UI text. All
 - Converts to TSV format with proper escaping for Excel compatibility
 - Provides HTML preview of final table structure
 
+### Text Comparison Engine
+- Implements line-based and word-level diff algorithm using dynamic programming
+- Supports both side-by-side and unified view modes
+- Real-time diff computation with visual highlighting of additions, deletions, and modifications
+- Provides diff statistics (additions, deletions, line counts)
+
 ### Cross-Platform Considerations
 - Keyboard shortcuts work on both Mac (Cmd) and Windows/Linux (Ctrl)
 - Clipboard operations use fallback methods for broader browser support
 - CSS uses system fonts for native appearance on each platform
 
-## File Dependencies
-PowerPoint conversion requires `pptxtojson.min.js` to load before `ppt-to-markdown.js`. All other modules can load in any order after `common.js`.
+## Module Loading Order
+- `common.js` must load first as it provides shared utilities for all tools
+- `text-diff.js` loads last and sets up real-time diff processing on DOM ready
+- All other modules can load in any order after `common.js`
+- PowerPoint functionality is present but not currently integrated into the main UI
