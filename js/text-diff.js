@@ -51,73 +51,113 @@ function renderTextDiff() {
 
     if (textDiffViewMode === 'side-by-side') {
         html = '<div class="diff-grid">';
-        unifiedDiff.forEach(part => {
-            if (part.added) {
-                part.value.forEach(line => {
-                    html += `
-                        <div class="diff-line diff-line-added">
-                            <div class="gutter"></div> <div class="content"></div>
-                        </div>
-                        <div class="diff-line diff-line-added">
-                            <div class="gutter">${j + 1}</div> <div class="content"><span class="token-added">${escapeHtml(line)}</span></div>
-                        </div>
-                    `;
-                    j++;
+
+        // Build a side-by-side diff with proper alignment/pairing of removed/added blocks
+        const lineDiff = Diff.diffLines(original, changed);
+        let originalLineNum = 1;
+        let changedLineNum = 1;
+
+        const rows = [];
+        let removedBuffer = [];
+        let addedBuffer = [];
+
+        const flushBuffers = () => {
+            if (removedBuffer.length === 0 && addedBuffer.length === 0) return;
+            const maxLen = Math.max(removedBuffer.length, addedBuffer.length);
+            for (let idx = 0; idx < maxLen; idx++) {
+                const left = removedBuffer[idx];
+                const right = addedBuffer[idx];
+
+                if (left !== undefined && right !== undefined) {
+                    // Replacement: do word-level diff highlighting
+                    const wordDiff = Diff.diffWords(left, right);
+                    let leftHtml = '';
+                    let rightHtml = '';
+                    wordDiff.forEach(word => {
+                        if (word.added) {
+                            rightHtml += `<span class="token-added">${escapeHtml(word.value)}</span>`;
+                        } else if (word.removed) {
+                            leftHtml += `<span class="token-deleted">${escapeHtml(word.value)}</span>`;
+                        } else {
+                            const safe = escapeHtml(word.value);
+                            leftHtml += safe;
+                            rightHtml += safe;
+                        }
+                    });
+                    rows.push({
+                        original: { num: originalLineNum, content: leftHtml, class: 'diff-line-modified' },
+                        changed: { num: changedLineNum, content: rightHtml, class: 'diff-line-modified' }
+                    });
+                    originalLineNum++;
+                    changedLineNum++;
                     added++;
-                });
-            } else if (part.removed) {
-                part.value.forEach(line => {
-                    html += `
-                        <div class="diff-line diff-line-deleted">
-                            <div class="gutter">${i + 1}</div> <div class="content"><span class="token-deleted">${escapeHtml(line)}</span></div>
-                        </div>
-                        <div class="diff-line diff-line-deleted">
-                            <div class="gutter"></div> <div class="content"></div>
-                        </div>
-                    `;
-                    i++;
                     removed++;
-                });
-            } else {
-                part.value.forEach(line => {
-                    const originalLine = original.split('\n')[i];
-                    const changedLine = changed.split('\n')[j];
-                    let originalContent = escapeHtml(originalLine);
-                    let changedContent = escapeHtml(changedLine);
-                    let lineClass = '';
+                } else if (left !== undefined) {
+                    rows.push({
+                        original: { num: originalLineNum, content: `<span class=\"token-deleted\">${escapeHtml(left)}</span>`, class: 'diff-line-deleted' },
+                        changed: { num: '', content: '', class: '' }
+                    });
+                    originalLineNum++;
+                    removed++;
+                } else if (right !== undefined) {
+                    rows.push({
+                        original: { num: '', content: '', class: '' },
+                        changed: { num: changedLineNum, content: `<span class=\"token-added\">${escapeHtml(right)}</span>`, class: 'diff-line-added' }
+                    });
+                    changedLineNum++;
+                    added++;
+                }
+            }
+            removedBuffer = [];
+            addedBuffer = [];
+        };
 
-                    if (originalLine !== changedLine) {
-                        lineClass = 'diff-line-modified';
-                        const wordDiff = Diff.diffWords(originalLine, changedLine);
-                        originalContent = '';
-                        changedContent = '';
-                        wordDiff.forEach(word => {
-                            if (word.added) {
-                                changedContent += `<span class="token-added">${escapeHtml(word.value)}</span>`;
-                            } else if (word.removed) {
-                                originalContent += `<span class="token-deleted">${escapeHtml(word.value)}</span>`;
-                            } else {
-                                originalContent += escapeHtml(word.value);
-                                changedContent += escapeHtml(word.value);
-                            }
-                        });
-                        added++;
-                        removed++;
-                    }
+        lineDiff.forEach(part => {
+            const lines = part.value.split('\n');
+            for (let index = 0; index < lines.length; index++) {
+                const line = lines[index];
+                if (index === lines.length - 1 && line === '') continue;
 
-                    html += `
-                        <div class="diff-line ${lineClass}">
-                            <div class="gutter">${i + 1}</div> <div class="content">${originalContent}</div>
-                        </div>
-                        <div class="diff-line ${lineClass}">
-                            <div class="gutter">${j + 1}</div> <div class="content">${changedContent}</div>
-                        </div>
-                    `;
-                    i++;
-                    j++;
-                });
+                if (part.removed) {
+                    removedBuffer.push(line);
+                } else if (part.added) {
+                    addedBuffer.push(line);
+                } else {
+                    // Unchanged block: flush any pending edits, then add identical lines
+                    flushBuffers();
+                    rows.push({
+                        original: { num: originalLineNum, content: escapeHtml(line), class: '' },
+                        changed: { num: changedLineNum, content: escapeHtml(line), class: '' }
+                    });
+                    originalLineNum++;
+                    changedLineNum++;
+                }
+            }
+            // When the part boundary changes, we might have completed a removed/added pair
+            if (!part.added && !part.removed) {
+                flushBuffers();
             }
         });
+
+        // Flush any remaining buffered lines at the end
+        flushBuffers();
+
+        // Generate HTML for each row
+        rows.forEach(row => {
+            html += `
+                <div class="diff-row">
+                    <div class="diff-line ${row.original.class}">
+                        <div class="gutter">${row.original.num}</div>
+                        <div class="content">${row.original.content}</div>
+                    </div>
+                    <div class="diff-line ${row.changed.class}">
+                        <div class="gutter">${row.changed.num}</div>
+                        <div class="content">${row.changed.content}</div>
+                    </div>
+                </div>
+            `;
+        });
+
         html += '</div>';
     } else { // Unified View
         html = '<div class="diff-unified">';

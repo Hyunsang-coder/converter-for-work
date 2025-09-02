@@ -87,6 +87,7 @@ body {
     padding: 10px 14px;
     font-size: 14px;
     border-radius: 8px;
+    text-align: left;
 }
 
 .main-content {
@@ -419,8 +420,14 @@ textarea:focus {
 }
 
 .diff-grid {
+    display: flex;
+    flex-direction: column;
+}
+
+.diff-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .diff-col {
@@ -436,7 +443,6 @@ textarea:focus {
     font-size: 13px;
     line-height: 1.4;
     padding: 2px 0;
-    border-bottom: 1px solid #f1f5f9;
     white-space: pre-wrap;
     min-height: 18px;
     display: flex;
