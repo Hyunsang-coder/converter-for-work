@@ -6,7 +6,7 @@ function toggleTextDiffView() {
     textDiffViewMode = textDiffViewMode === 'side-by-side' ? 'unified' : 'side-by-side';
     const toggleBtn = document.getElementById('textDiffViewToggle');
     // Button label shows the opposite of current mode (action to switch to)
-    if (toggleBtn) toggleBtn.textContent = textDiffViewMode === 'side-by-side' ? 'Unified View' : 'Side by Side';
+    if (toggleBtn) toggleBtn.textContent = textDiffViewMode === 'side-by-side' ? '같이 보기' : '양옆에 배치';
     renderTextDiff();
 }
 
@@ -22,7 +22,7 @@ function enableTextDiffButtons() {
     changed?.addEventListener('input', updateState);
     // Initialize toggle button label correctly on load
     const toggleBtn = document.getElementById('textDiffViewToggle');
-    if (toggleBtn) toggleBtn.textContent = textDiffViewMode === 'side-by-side' ? 'Unified View' : 'Side by Side';
+    if (toggleBtn) toggleBtn.textContent = textDiffViewMode === 'side-by-side' ? '같이 보기' : '양옆에 배치';
     updateState();
 }
 
@@ -163,7 +163,7 @@ function renderTextDiff() {
         });
 
         html += '</div>';
-    } else { // Unified View
+    } else { // 같이 보기
         html = '<div class="diff-unified">';
         const lineDiff = Diff.diffLines(original, changed);
         lineDiff.forEach(part => {
