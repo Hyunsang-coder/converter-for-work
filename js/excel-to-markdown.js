@@ -2,7 +2,7 @@
 
 /**
  * HTML 테이블을 rowspan/colspan을 고려하여 2D 그리드 배열로 변환합니다.
- * 병합된 셀 영역은 첫 번째 셀에만 텍스트가 들어가고 나머지는 빈 문자열로 채워집니다.
+ * 병합된 셀 영역은 병합 범위 전체에 동일한 텍스트를 채워, 각 행이 완전한 컨텍스트를 갖도록 합니다.
  * @param {HTMLTableElement} table - 변환할 HTML 테이블 요소
  * @returns {string[][]} 2D 배열 형태의 테이블 데이터
  */
@@ -27,8 +27,8 @@ function tableToGrid(table) {
                 for (let dc = 0; dc < colSpan; dc++) {
                     const rr = r + dr;
                     if (!grid[rr]) grid[rr] = [];
-                    // 병합된 첫 칸만 text, 나머지는 빈칸으로 자리 예약 (열 shift 방지)
-                    grid[rr][c + dc] = (dr === 0 && dc === 0) ? text : '';
+                    // 병합 범위 전체에 텍스트를 채워 행/열 정보가 뒤섞이지 않도록 함
+                    grid[rr][c + dc] = text;
                 }
             }
             c += colSpan;

@@ -64,6 +64,12 @@ body {
     opacity: 0.8;
 }
 
+.update-date {
+    font-size: 0.7rem;
+    font-style: italic;
+    opacity: 0.7;
+}
+
 /* Sidebar layout */
 .app-layout {
     display: grid;
