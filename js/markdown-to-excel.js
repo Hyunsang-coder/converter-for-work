@@ -49,7 +49,9 @@ function convertMarkdownToExcel() {
             rowStr
                 .replace(/^\||\|$/g, '')
                 .split('|')
-                .map(cell => cell.trim().replace(/<br\s*\/?>/gi, '\n'))
+                .map(cell => cell.trim()
+                    .replace(/<br\s*\/?>/gi, '\n')
+                    .replace(/&#124;/g, '|'))  // 파이프 문자 언이스케이프 (excel-to-markdown 호환성)
         );
 
         let finalTableData;
