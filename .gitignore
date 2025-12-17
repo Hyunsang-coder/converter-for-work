@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Playwright / browser automation artifacts
+.playwright-mcp/
+playwright-report/
+test-results/
+
+# Local test harness (requested to be ignored)
+tests/
+
+

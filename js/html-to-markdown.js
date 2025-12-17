@@ -1,7 +1,12 @@
 // === 도구 1: HTML -> 마크다운 (수정됨) ===
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('htmlInput').addEventListener('input', function () {
-        document.getElementById('htmlConvertBtn').disabled = this.innerHTML.trim().length === 0;
+    // In test pages or embedded contexts these elements may not exist
+    const htmlInput = document.getElementById('htmlInput');
+    const convertBtn = document.getElementById('htmlConvertBtn');
+    if (!htmlInput || !convertBtn) return;
+
+    htmlInput.addEventListener('input', function () {
+        convertBtn.disabled = this.innerHTML.trim().length === 0;
     });
 });
 
@@ -68,9 +73,37 @@ function convertHtmlToMarkdown() {
 
 function domToMarkdown(rootElement) {
     // New recursive parser for handling nested lists
+    function isInlineTag(tagName) {
+        // Common inline/phrasing tags where whitespace-only text nodes matter
+        return [
+            'a', 'span', 'strong', 'b', 'em', 'i', 'u', 's', 'code', 'kbd', 'small',
+            'sub', 'sup', 'mark', 'time', 'cite', 'q', 'abbr'
+        ].includes(tagName);
+    }
+
+    function normalizeTextNode(node) {
+        const text = node && node.textContent;
+        if (text == null) return '';
+        // Normalize CRLF -> LF, convert NBSP to space
+        let s = String(text).replace(/\r\n?/g, '\n').replace(/\u00a0/g, ' ');
+        const trimmed = s.trim();
+        // If it's whitespace-only, keep a single space in inline contexts to avoid word-joining
+        if (trimmed.length === 0) {
+            const parentTag = node && node.parentElement ? node.parentElement.tagName.toLowerCase() : '';
+            return isInlineTag(parentTag) ? ' ' : '';
+        }
+        // Collapse horizontal whitespace but preserve newlines
+        s = s.replace(/[ \t\f\v]+/g, ' ');
+        // Remove spaces around newlines to keep line structure clean
+        s = s.replace(/ *\n */g, '\n');
+        // Prevent runaway blank lines
+        s = s.replace(/\n{3,}/g, '\n\n');
+        return s;
+    }
+
     function processNode(node, depth = 0) {
         if (node.nodeType === Node.TEXT_NODE) {
-            return node.textContent.replace(/\s+/g, ' ').trim();
+            return normalizeTextNode(node);
         }
         if (node.nodeType !== Node.ELEMENT_NODE) {
             return '';
@@ -84,6 +117,18 @@ function domToMarkdown(rootElement) {
             content += processNode(child, depth);
         });
 
+        function getListItemElements(listNode) {
+            const children = Array.from(listNode.children || []).filter(el => el && el.tagName);
+            const liChildren = children.filter(el => el.tagName.toLowerCase() === 'li');
+            if (liChildren.length > 0) return liChildren;
+
+            const roleItems = children.filter(el => (el.getAttribute('role') || '').toLowerCase() === 'listitem');
+            if (roleItems.length > 0) return roleItems;
+
+            // Fallback: some pages use <p>/<div> directly under <ul>/<ol>
+            return children.filter(el => !['script', 'style'].includes(el.tagName.toLowerCase()));
+        }
+
         switch (tagName) {
             case 'h1': return '# ' + content.trim() + '\n\n';
             case 'h2': return '## ' + content.trim() + '\n\n';
@@ -92,14 +137,25 @@ function domToMarkdown(rootElement) {
             case 'strong': case 'b': return `**${content.trim()}**`;
             case 'em': case 'i': return `*${content.trim()}*`;
             case 'br': return '\n'; // Treat <br> as a hard line break
+            case 'div':
+                // Pasting plain text into contenteditable often produces <div> per line.
+                // Treat inner <div> as a line break, but keep the root container as-is.
+                if (node === rootElement) return content;
+                return (content.length ? content.trimEnd() : '') + '\n';
+            case 'pre':
+                // Preserve preformatted text as fenced code block
+                return '```\n' + (node.textContent || '').replace(/\n$/, '') + '\n```\n\n';
+            case 'code':
+                return '`' + content.trim() + '`';
             case 'ul':
             case 'ol':
                 let listContent = '\n';
-                Array.from(node.children).forEach((li, index) => {
-                    if (li.tagName.toLowerCase() === 'li') {
-                        listContent += processListItem(li, depth, tagName === 'ol', index);
-                    }
-                });
+                {
+                    const items = getListItemElements(node);
+                    items.forEach((itemEl, index) => {
+                        listContent += processListItem(itemEl, depth, tagName === 'ol', index);
+                    });
+                }
                 return listContent;
             case 'table':
                 // rowspan/colspan을 포함한 병합 테이블도 열/행이 뒤섞이지 않도록 그리드로 평면화하여 출력
@@ -158,7 +214,12 @@ function domToMarkdown(rootElement) {
             }
         });
 
-        return `${indent}${marker}${textContent.trim()}${nestedListContent}\n`;
+        let itemText = textContent.trim();
+        if (itemText.includes('\n')) {
+            const continuationIndent = indent + '  ';
+            itemText = itemText.replace(/\n/g, '\n' + continuationIndent);
+        }
+        return `${indent}${marker}${itemText}${nestedListContent}\n`;
     }
 
     // Clean up the final output
