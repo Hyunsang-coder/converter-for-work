@@ -133,7 +133,31 @@ const modifierKey = isMac ? 'metaKey' : 'ctrlKey';
 // 페이지 로드 시 단축키 표시 업데이트
 document.addEventListener('DOMContentLoaded', function () {
     updateShortcutHints();
+    updateLastUpdatedFromGitHub();
 });
+
+/**
+ * GitHub API를 통해 마지막 커밋 날짜를 가져와 업데이트합니다.
+ */
+async function updateLastUpdatedFromGitHub() {
+    const dateElement = document.getElementById('lastUpdatedDate');
+    if (!dateElement) return;
+
+    try {
+        const response = await fetch('https://api.github.com/repos/Hyunsang-coder/converter-for-work/commits?per_page=1');
+        if (!response.ok) throw new Error('GitHub API response not ok');
+
+        const commits = await response.json();
+        if (commits && commits.length > 0) {
+            const lastCommitDate = new Date(commits[0].commit.committer.date);
+            const formattedDate = lastCommitDate.toISOString().split('T')[0];
+            dateElement.textContent = `last updated: ${formattedDate}`;
+        }
+    } catch (error) {
+        console.error('Failed to fetch last updated date from GitHub:', error);
+        // API 호출 실패 시 기존에 적혀있는 날짜를 그대로 둡니다.
+    }
+}
 
 function updateShortcutHints() {
     const shortcuts = document.querySelectorAll('.shortcut-hint');
