@@ -7,8 +7,54 @@ document.addEventListener('DOMContentLoaded', function () {
 
     htmlInput.addEventListener('input', function () {
         convertBtn.disabled = this.innerHTML.trim().length === 0;
+        updateWordCount(this);
     });
 });
+
+/**
+ * 입력된 HTML 내용에서 의미 있는 단어 수를 계산하여 UI를 업데이트합니다.
+ * 미디어 태그(img, video 등) 및 불필요한 태그는 제외합니다.
+ */
+function updateWordCount(element) {
+    const badge = document.getElementById('htmlWordCount');
+    if (!badge) return;
+
+    const html = element.innerHTML;
+    if (!html || html.trim() === '') {
+        badge.style.display = 'none';
+        badge.textContent = '0 words';
+        return;
+    }
+
+    // 임시 DOM을 사용하여 불필요한 태그 제거 및 텍스트 추출
+    const tempDiv = document.createElement('div');
+    // 보안 및 사이드 이펙트 방지를 위해 스크립트 등 제거 후 삽입
+    tempDiv.innerHTML = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "")
+                            .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gim, "");
+    
+    // 미디어 소스 및 불필요한 태그 제거
+    const tagsToRemove = ['img', 'video', 'audio', 'iframe', 'svg', 'canvas', 'object', 'embed'];
+    tagsToRemove.forEach(tag => {
+        const nodes = tempDiv.querySelectorAll(tag);
+        nodes.forEach(n => n.remove());
+    });
+
+    // 텍스트 추출 (innerText는 스타일을 고려하므로 더 정확할 수 있음)
+    const rawText = tempDiv.innerText || tempDiv.textContent || "";
+    
+    // 단어 수 계산: 공백(줄바꿈 포함)을 기준으로 분리하되 빈 문자열 제외
+    // 한국어의 경우 어절 단위로 계산됨
+    const words = rawText.trim().split(/\s+/).filter(word => word.length > 0);
+    const wordCount = words.length;
+
+    badge.textContent = `${wordCount.toLocaleString()} words`;
+    badge.style.display = wordCount > 0 ? 'inline-block' : 'none';
+    if (wordCount > 0) {
+        badge.classList.add('visible');
+    } else {
+        badge.classList.remove('visible');
+    }
+}
 
 /**
  * HTML 테이블을 rowspan/colspan을 고려하여 2D 그리드 배열로 변환합니다.
@@ -232,5 +278,10 @@ function clearHtmlTool() {
     document.getElementById('htmlMarkdownOutput').value = '';
     document.getElementById('htmlCopyBtn').disabled = true;
     document.getElementById('htmlConvertBtn').disabled = true;
+    const badge = document.getElementById('htmlWordCount');
+    if (badge) {
+        badge.style.display = 'none';
+        badge.textContent = '0 words';
+    }
     showStatus('초기화되었습니다.', 'success');
 }
