@@ -30,8 +30,9 @@ function updateWordCount(element) {
     const tempDiv = document.createElement('div');
     // 보안 및 사이드 이펙트 방지를 위해 스크립트 등 제거 후 삽입
     tempDiv.innerHTML = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, "")
-                            .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gim, "");
-    
+        .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gim, "")
+        .replace(/>(?=\s*<)/g, "> "); // 태그 사이 공백 강제 삽입 (인라인 태그 붙음 방지)
+
     // 미디어 소스 및 불필요한 태그 제거
     const tagsToRemove = ['img', 'video', 'audio', 'iframe', 'svg', 'canvas', 'object', 'embed'];
     tagsToRemove.forEach(tag => {
@@ -41,7 +42,7 @@ function updateWordCount(element) {
 
     // 텍스트 추출 (innerText는 스타일을 고려하므로 더 정확할 수 있음)
     const rawText = tempDiv.innerText || tempDiv.textContent || "";
-    
+
     // 단어 수 계산: 공백(줄바꿈 포함)을 기준으로 분리하되 빈 문자열 제외
     // 한국어의 경우 어절 단위로 계산됨
     const words = rawText.trim().split(/\s+/).filter(word => word.length > 0);
